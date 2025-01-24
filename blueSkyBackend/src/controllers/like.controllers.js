@@ -1,20 +1,33 @@
 import mongoose from "mongoose";
 import { Like} from "../models/like.models.js";
-import { Post } from "../models/post.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncRequestHandler.js";
+import { Notification, NotificationType } from "../models/notification.models.js";
+import { Post } from "../models/post.models.js";
+import { User } from "../models/user.models.js";
+import { io } from "../app.js";
 
 const togglePostLike = asyncHandler(async (req, res) => {
     const { postId } = req.params
 
     try {
+        const post = await Post.findById(postId)
+
+        if(!post) throw new ApiError(400, 'post does not exist')
+
         const like = await Like.findOne({postId})
 
         if(!like) throw new ApiError(400, 'Like not found')
 
-        const userLiked = like?.userIdArray.indexOf(req.user._id) === -1 ? false : true
+        const receiverUser = await User.findById(post?.userId)
 
+        const notificationExist = await Notification.findOne({
+            relatedPostId: post?._id,
+            senderUserId: req?.user?._id
+        })
+        
+        const userLiked = like?.userIdArray.indexOf(req.user._id) === -1 ? false : true
 
         if(!userLiked){
 
@@ -26,6 +39,39 @@ const togglePostLike = asyncHandler(async (req, res) => {
                     }
                 }
             )
+
+
+            if(!notificationExist){
+
+                const notificationCreated = await Notification.create({
+                    senderUserId: req?.user?._id,
+                    receiverUserId: receiverUser?._id,
+                    type: NotificationType.LIKE,
+                    message: 'Liked your post',
+                    relatedPostId: post?._id
+                })
+
+                if(!notificationCreated) throw new ApiError(400, 'error creating notification')
+
+                io.to(post?.userId?.toString()).emit('newNotification', {
+                    senderUserId: req?.user,
+                    receiverUserId: receiverUser,
+                    type: NotificationType.LIKE,
+                    message: 'Liked your post',
+                    relatedPostId: post
+
+                })
+            } else {
+                await Notification.findByIdAndUpdate(notificationExist?._id,
+                    {
+                        $set:{
+                            type: NotificationType.LIKE
+                        }
+                    }
+                )
+            }
+
+
         } else {
 
             await Like.updateOne(
@@ -36,6 +82,16 @@ const togglePostLike = asyncHandler(async (req, res) => {
                     }
                 }
             )
+
+            if(notificationExist){
+                await Notification.findByIdAndUpdate(notificationExist?._id,
+                    {
+                        $set:{
+                            type: NotificationType.UNLIKE
+                        }
+                    }
+                )
+            }
         }
 
         const likeToggled = await Like.findOne({postId})
@@ -47,92 +103,7 @@ const togglePostLike = asyncHandler(async (req, res) => {
     }
 })
 
-const userLikedPosts = asyncHandler(async (req, res) => {
-    const { userId } = req.params
-
-    try {
-        const userLiked = await postsLiked(userId)
-
-        return res.status(200).json(new ApiResponse(200, userLiked, 'done'))
-    } catch (error) {
-        throw new ApiError(400, error?.message || 'something went wrong')
-    }
-})
-
-const postsLiked = async (userId) => {
-    const result = await Like.aggregate([
-        {
-            $match: {
-                userIdArray: new mongoose.Types.ObjectId(userId)
-            }
-        },
-        {
-            $lookup: {
-                from: 'posts',
-                localField: 'postId',
-                foreignField: '_id',
-                as: 'postsLiked'
-            }
-        },
-        {
-            $project: {
-                postsLiked: 1
-            }
-        },
-        {
-            $unwind: '$postsLiked'
-        },
-        {
-            $lookup: {
-                from: 'posts',
-                localField: 'postsLiked._id',
-                foreignField: 'parentPost',
-                as: 'replies'
-            }
-        },
-        {
-            $addFields: {
-                replyCount: {
-                    $size: '$replies'
-                }
-            }
-        },
-        {
-            $lookup: {
-                from: 'likes',
-                localField: 'postsLiked._id',
-                foreignField: 'postId',
-                as: 'postLikes'
-            }
-        },
-        {
-            $addFields: {
-                likeCount: {
-                    $size: {$first: '$postLikes.userIdArray'}
-                }
-            }
-        },
-        {
-            $group: {
-                _id: '$postsLiked._id',
-                text: {$first: '$postsLiked.text'},
-                mediaFiles: {$first: '$postsLiked.mediaFiles'},
-                userId: {$first: '$postsLiked.userId'},
-                parentPost: {$first: '$postsLiked.parentPost'},
-                isPublic: {$first: '$postsLiked.isPublic'},
-                createdAt: {$first: '$postsLiked.createdAt'},
-                updatedAt: {$first: '$postsLiked.updatedAt'},
-                replyCount: {$first: '$replyCount'},
-                likeCount: {$first: '$likeCount'},
-
-            }
-        }
-    ])
-
-    return result
-}
 
 export {
     togglePostLike,
-    userLikedPosts
 }

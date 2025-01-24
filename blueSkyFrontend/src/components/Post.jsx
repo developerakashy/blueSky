@@ -3,31 +3,35 @@ import { useUser } from '../context/userContext'
 import PostCard from './PostCard'
 import { useNavigate } from 'react-router'
 import CreatePost from './CreatePost'
+import axios from 'axios'
 
 function Post({post, postReplies, parentPost}){
     const {publishPost, setPublishPost} = useUser()
     const user = post?.userId
-    const [publishReply, setPublishReply] = useState(false)
+
+    const [posts, setPosts] = useState(postReplies)
+    const [postReplyCount, setPostReplyCount] = useState(post?.replyCount || 0)
+    const [postLikeCount, setPostLikeCount] = useState(post?.likeCount || 0)
+    const [postLiked, setPostLiked] = useState(post?.userLiked || false)
+
+    const navigate = useNavigate()
     const [previewImage, setPreviewImage] = useState(false)
     const [previewVideo, setPreviewVideo] = useState(false)
     const [currentIndex, setCurrentIndex] = useState(0)
-    const [posts, setPosts] = useState(postReplies)
-
-    useEffect(() => {
-        setPosts(postReplies)
-    }, [postReplies])
-
-    const [postLikeCount, setPostLikeCount] = useState(post?.likeCount)
-    const [postLiked, setPostLiked] = useState(post?.userLiked)
-
-    const navigate = useNavigate()
 
     let likeTimeoutRef = useRef(null)
-    let wasPostLikedRef = useRef(post?.userLiked)
-
+    let wasPostLikedRef = useRef(post?.userLiked || false)
 
     const imageUrl = post?.mediaFiles
     const mediaLength = imageUrl?.length
+
+    useEffect(() => {
+        setPosts(postReplies)
+        setPostLikeCount(post?.likeCount)
+        setPostReplyCount(post?.replyCount)
+        setPostLiked(post?.userLiked)
+        wasPostLikedRef.current = post?.userLiked
+    }, [postReplies, post])
 
     useEffect(() => {
         if(previewImage || previewVideo){
@@ -50,7 +54,6 @@ function Post({post, postReplies, parentPost}){
         console.log(index)
     }
 
-
     const closeModal = (e) => {
         e.stopPropagation()
         if(imageUrl[currentIndex].split('/')[4] === 'video'){
@@ -59,8 +62,6 @@ function Post({post, postReplies, parentPost}){
             setPreviewImage(false)
         }
     }
-
-
 
     const mediaGallery = () => {
         let mediaType = ''
@@ -77,9 +78,21 @@ function Post({post, postReplies, parentPost}){
         }
     }
 
+    const handelPostReply = (e) => {
+        e.stopPropagation()
+        setPublishPost({publish: true, setPosts, parentPost: post})
+    }
 
+    useEffect(() => {
+        if(publishPost.postPublishParentId === post._id){
+            post.replyCount = parseInt(post?.replyCount) + 1
+            setPostReplyCount(prev => prev + 1)
+            setPublishPost({publish: false})
+        }
 
-    const handlePostLike = (e, postId) => {
+    }, [publishPost])
+
+    const handlePostLike = (e) => {
         e.stopPropagation()
         if(likeTimeoutRef.current){
             clearTimeout(likeTimeoutRef.current)
@@ -88,8 +101,6 @@ function Post({post, postReplies, parentPost}){
         setPostLikeCount(prev => postLiked ? prev - 1 : prev + 1)
 
         setPostLiked(prev => !prev)
-
-
 
     }
 
@@ -105,25 +116,22 @@ function Post({post, postReplies, parentPost}){
         }
 
         likeTimeoutRef.current = setTimeout(async () => {
-            if(!(postLiked === wasPostLikedRef.current)){
+            if(postLiked !== wasPostLikedRef.current){
                 console.log('request sent')
                 const result = await togglePostLike()
                 wasPostLikedRef.current = postLiked
                 setPostLikeCount(result)
-
             }
-        }, 1000)
-
-
+        }, 500)
 
     }, [postLiked])
 
 
-    
+
 
     return(
     <>
-        <div className='w-[600px] min-h-screen mb-[0.45px]'>
+        <div className='w-[600px]'>
             <div className='sticky top-0 bg-white flex items-center p-2'>
                 <button onClick={() => navigate(-1)} className='px-4 rounded-full mr-6'><img className='h-4' src="../../../back.png" alt="" /></button>
                 <p className='text-xl font-semibold'>Post</p>
@@ -169,13 +177,13 @@ function Post({post, postReplies, parentPost}){
                 </div>
 
                 <div className='flex justify-between mx-4 py-3 border-y-[1px]'>
-                    <button className='flex items-center'><img className='h-6 w-6' src="../../../comment.png" alt="" />{post?.replyCount}</button>
+                    <button onClick={(e) => handelPostReply(e)} className='flex items-center'><img className='h-6 w-6' src="../../../comment.png" alt="" />{postReplyCount}</button>
                     <button className='flex items-center'><img className='mr-1 h-5 w-5' src="../../../repost.png" alt="" />0</button>
-                    <button className='flex items-center'><img className={`mr-1 h-5 w-5 ${post?.userLiked && 'bg-red-200'}`} src="../../../heart.png" alt="" />{post?.likeCount}</button>
+                    <button onClick={(e) => handlePostLike(e)} className='flex items-center'><img className={`mr-1 h-5 w-5 ${postLiked && 'bg-red-200'}`} src="../../../heart.png" alt="" />{postLikeCount}</button>
                     <button className='flex items-center'><img className='mr-1 h-5 w-5' src="../../../bar-chart.png" alt="" />2</button>
                 </div>
 
-                <div className='flex justify-between p-4 border-b-[1px] pb-8'>
+                <div className='flex justify-between p-4 border-b-[1px]'>
                     <div className='flex items-center gap-2'>
                     <img className='h-10 w-10 object-cover rounded-full' src={user?.avatar} alt="" />
                     <p className=''>Post your reply</p>

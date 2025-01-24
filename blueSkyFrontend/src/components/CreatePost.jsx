@@ -159,7 +159,6 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                     name="mediaFiles"
                     className="hidden"
                     accept="image/jpeg, image/png, image/webp, image/gif ,video/mp4"
-                    max={4}
                     type="file"
                     disabled={imageUrls.length >= 4}
                     onChange={(e) => handleFileInput(e)}

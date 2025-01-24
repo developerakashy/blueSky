@@ -3,6 +3,7 @@ import { Outlet } from 'react-router'
 import Nav from '../components/Nav'
 import { useUser } from '../context/userContext'
 import CreatePost from '../components/CreatePost'
+import DirectMessage from './DirectMessage'
 
 function Layout(){
     const {publishPost, setPublishPost} = useUser()
@@ -10,6 +11,7 @@ function Layout(){
 
     return (
         <div className='flex justify-center'>
+            <DirectMessage/>
             {publishPost?.publish && <CreatePost setPosts={publishPost?.setPosts} parentPost={publishPost.parentPost} setPublishPost={setPublishPost}/>}
             <div className='sticky top-0 border-l-[1px] h-screen w-[270px]'>
                 <Nav/>

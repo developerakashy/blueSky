@@ -10,11 +10,14 @@ import Home from './pages/Home'
 import PostView from './pages/PostView'
 import { PostContextProvider } from './context/postContext'
 import { ScrollProvider } from './context/ScrollContext'
+import FollowingsAndFollowers from './pages/Following'
+import Notification from './pages/Notification'
 
 function App() {
   const [user, setUser] = useState(null)
   const [posts, setPosts] = useState([])
   const [publishPost, setPublishPost] = useState(false)
+
 
   useEffect(() => {
 
@@ -29,6 +32,8 @@ function App() {
       }
     }
     getLoggedInUser()
+
+
 
   }, [])
 
@@ -78,8 +83,13 @@ function App() {
           </Route>
           <Route path='/' element={<Layout/>}>
             <Route index element={<Home/>} />
-            <Route path='user/:username' element={<Profile/>}/>
+            <Route path='user' >
+              <Route index path=':username' element={<Profile/>}/>
+              <Route path=':username/followers' element={<FollowingsAndFollowers/>}/>
+              <Route path=':username/followings' element={<FollowingsAndFollowers/>}/>
+            </Route>
             <Route path='post/:postId' element={<PostView/>}/>
+            <Route path='notifications' element={<Notification/>}/>
           </Route>
 
           <Route path='*' element={<p>Page not found</p>}/>

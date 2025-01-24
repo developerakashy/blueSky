@@ -120,115 +120,94 @@ const isUsernameAvailable = asyncHandler(async (req, res) => {
     }
 })
 
-const userProfile = asyncHandler(async (req, res) => {
+const getUserProfile = asyncHandler(async (req, res) => {
     const { username } = req?.params
 
+    const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
+
     try {
-        const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
-        const userInfo = await User.findOne({username})
-
-        if(!userInfo) throw new ApiError(400, 'user not found')
-
-        const userPosts = await Post.aggregate([
+        const userInfo = await User.aggregate([
             {
                 $match: {
-                    userId: userInfo?._id,
-                    parentPost: null
-                }
-            },
-
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'userId',
-                    foreignField: '_id',
-                    as: 'userInfo'
-                }
-            },
-            {
-                $addFields: {
-                    userId: {
-                        $first: '$userInfo'
-                    }
+                    username
                 }
             },
             {
                 $lookup: {
-                    from: 'posts',
+                    from: 'follows',
                     localField: '_id',
-                    foreignField: 'parentPost',
-                    as: 'replies'
+                    foreignField: 'userId',
+                    as: 'followers'
                 }
             },
             {
                 $addFields: {
-                    replyCount: {
-                        $size: '$replies'
-                    }
-                }
-            },
-            {
-                $lookup: {
-                    from: 'likes',
-                    localField: '_id',
-                    foreignField: 'postId',
-                    as: 'postLikes'
-                }
-            },
-            {
-                $addFields: {
-                    likeCount: {
-                        $size: {
-                            $ifNull: [{ $first: '$postLikes.userIdArray' }, []]
-                        }
+                    userFollowed: {
+                        $in : [currentUser, {$ifNull: [{$first: '$followers.userIdArray'}, []]}]
                     },
-                    userLiked: {
-                        $in: [currentUser, {$ifNull: [{ $first: '$postLikes.userIdArray' }, []]}]
+                    followerCount: {
+                        $size: {
+                            $ifNull: [{$first: '$followers.userIdArray'}, []]
+                        }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'follows',
+                    localField: '_id',
+                    foreignField: 'userIdArray',
+                    as: 'followings'
+                }
+            },
+            {
+                $addFields: {
+                    followingCount: {
+                        $size: {
+                            $ifNull: ['$followings', []]
+                        }
                     }
                 }
             },
             {
                 $project: {
-                    text: 1,
-                    mediaFiles: 1,
-                    userId: {
-                        _id: 1,
-                        fullname: 1,
-                        username: 1,
-                        email: 1,
-                        avatar: 1,
-                        coverImage: 1,
-                        about: 1,
-                        createdAt: 1,
-                        updatedAt: 1,
-                        isVerified: 1
-                    },
-                    parentPost: 1,
-                    isPublic: 1,
+                    _id: 1,
+                    username: 1,
+                    email: 1,
+                    fullname: 1,
+                    coverImage: 1,
+                    avatar: 1,
+                    about: 1,
                     createdAt: 1,
                     updatedAt: 1,
-                    replyCount: 1,
-                    likeCount: 1,
-                    userLiked: 1
-
+                    isVerified: 1,
+                    userFollowed: 1,
+                    followerCount: 1,
+                    followingCount: 1
                 }
             }
+
         ])
 
-        return res.status(200).json(new ApiResponse(200, {userInfo, userPosts}, 'user fetched successfully'))
+        if(!userInfo) throw new ApiError(400, 'user not found')
+
+
+        return res.status(200).json(new ApiResponse(200, userInfo[0], 'user fetched successfully'))
     } catch (error) {
         throw new ApiError(400, error?.message || 'someething went wrong')
     }
 })
 
+
 const updateProfile = asyncHandler(async (req, res) => {
-    const { about } = req.body
+    const { about, fullname } = req.body
     const avatarImagePath = req.files?.avatarImage?.[0]?.path
     const coverImagePath = req.files?.coverImage?.[0]?.path
 
     const updates = {}
 
     if(about?.trim()) updates.about = about
+    if(fullname?.trim()) updates.fullname = fullname
 
     let avatarImage
     if(avatarImagePath && req.files?.avatarImage?.[0]?.mimetype?.split('/')[0] === 'image'){
@@ -240,7 +219,7 @@ const updateProfile = asyncHandler(async (req, res) => {
             console.log(error)
             throw new ApiError(400, 'error uploading avatar image')
         }
-    }media1, media2, media3, media4
+    }
 
     let coverImage
     if(coverImagePath && req.files?.coverImage?.[0]?.mimetype?.split('/')[0] === 'image'){
@@ -328,6 +307,16 @@ const logout = asyncHandler(async (req, res) => {
 
 })
 
+// const notifications = asyncHandler(async (req, res) => {
+
+
+//     try {
+
+//     } catch (error) {
+
+//     }
+// })
+
 
 export {
     generateAccessAndRefreshToken,
@@ -337,5 +326,5 @@ export {
     isUsernameAvailable,
     updateProfile,
     logout,
-    userProfile
+    getUserProfile
 }

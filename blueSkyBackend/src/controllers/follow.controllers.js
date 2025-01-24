@@ -3,6 +3,8 @@ import { Follow } from "../models/follow.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncRequestHandler.js";
+import { Notification, NotificationType } from "../models/notification.models.js";
+import { io } from "../app.js";
 
 const toggleFollow = asyncHandler(async (req, res) => {
     const { userId } = req.params
@@ -14,17 +16,51 @@ const toggleFollow = asyncHandler(async (req, res) => {
 
         if(!follow) throw ApiError(400, `user's Follow model cannot be found`)
 
+        const receiverUser = await User.findById(userId)
+
+        const notificationExist = await Notification.findOne({
+            senderUserId: req?.user?._id,
+            receiverUserId: receiverUser?._id
+        })
+
         const userFollowed = follow?.userIdArray.indexOf(req.user._id) === -1 ? false: true
 
         if(!userFollowed){
             await Follow.updateOne(
                 {userId},
                 {
-                    $addToSet: {
+                    $push: {
                         userIdArray: req.user._id
                     }
                 }
             )
+
+            if(!notificationExist){
+                const notificationCreated = await Notification.create({
+                    senderUserId: req?.user?._id,
+                    receiverUserId: receiverUser?._id,
+                    type: NotificationType.FOLLOW,
+                    message: 'Followed you'
+                })
+
+                if(!notificationCreated) throw new ApiError(400, 'error creating notification')
+
+                io.to(receiverUser?._id?.toString()).emit('newNotification', {
+                    senderUserId: req?.user,
+                    receiverUserId: receiverUser,
+                    type: NotificationType.FOLLOW,
+                    message: 'Followed you'
+                })
+            } else {
+                await Notification.findByIdAndUpdate(notificationExist?._id,
+                    {
+                        $set:{
+                            type: NotificationType.FOLLOW
+                        }
+                    }
+                )
+            }
+
         } else {
             await Follow.updateOne(
                 {userId},
@@ -34,6 +70,16 @@ const toggleFollow = asyncHandler(async (req, res) => {
                     }
                 }
             )
+
+            if(notificationExist){
+                await Notification.findByIdAndUpdate(notificationExist?._id,
+                    {
+                        $set:{
+                            type: NotificationType.UNFOLLOW
+                        }
+                    }
+                )
+            }
         }
 
         const userFollowers = await Follow.findOne({userId})
@@ -99,6 +145,7 @@ const followers = async (userId) => {
                 username: '$userInfo.username',
                 email: '$userInfo.email',
                 avatar: '$userInfo.avatar',
+                about: '$userInfo.about',
                 coverImage: '$userInfo.coverImage',
                 isVerified: '$userInfo.isVerified',
                 createdAt: '$userInfo.createdAt',
@@ -133,6 +180,7 @@ const followings = async (userId) => {
                 username: {$first: '$userInfo.username'},
                 email: {$first: '$userInfo.email'},
                 avatar: {$first: '$userInfo.avatar'},
+                about: {$first: '$userInfo.about'},
                 coverImage: {$first: '$userInfo.coverImage'},
                 isVerified: {$first: '$userInfo.isVerified'},
                 createdAt: {$first: '$userInfo.createdAt'},

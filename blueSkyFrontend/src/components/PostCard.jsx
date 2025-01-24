@@ -5,15 +5,15 @@ import { useNavigate } from "react-router";
 
 
 
-function PostCard({post}){
+function PostCard({post, repliedTo}){
     const navigate = useNavigate()
     const {publishPost, setPublishPost} = useUser()
     const [previewImage, setPreviewImage] = useState(false)
     const [previewVideo, setPreviewVideo] = useState(false)
     const [currentIndex, setCurrentIndex] = useState(0)
 
-    const [postLikeCount, setPostLikeCount] = useState(post?.likeCount)
-    const [postReplyCount, setPostReplyCount] = useState(post?.replyCount)
+    const [postLikeCount, setPostLikeCount] = useState(post?.likeCount || 0)
+    const [postReplyCount, setPostReplyCount] = useState(post?.replyCount || 0)
     const [postLiked, setPostLiked] = useState(post?.userLiked)
 
     let likeTimeoutRef = useRef(null)
@@ -22,6 +22,12 @@ function PostCard({post}){
     const user = post?.userId
     const imageUrl = post?.mediaFiles
     const mediaLength = imageUrl?.length
+
+    // useEffect(() => {
+    //     setPostReplyCount(post?.replyCount || 0)
+    //     setPostLikeCount(post?.likeCount || 0)
+    //     setPostLiked(post?.userLiked || 0)
+    // }, [post])
 
     useEffect(() => {
         if(previewImage || previewVideo){
@@ -55,7 +61,6 @@ function PostCard({post}){
     }
 
 
-
     const mediaGallery = () => {
         let mediaType = ''
         if(mediaLength === 1){
@@ -72,14 +77,13 @@ function PostCard({post}){
     }
 
 
-    const handlePostLike = (e, postId) => {
+    const handlePostLike = (e) => {
         e.stopPropagation()
         if(likeTimeoutRef.current){
             clearTimeout(likeTimeoutRef.current)
         }
 
         setPostLikeCount(prev => postLiked ? prev - 1 : prev + 1)
-
         setPostLiked(prev => !prev)
 
     }
@@ -112,14 +116,14 @@ function PostCard({post}){
         }
 
         likeTimeoutRef.current = setTimeout(async () => {
-            if(!(postLiked === wasPostLikedRef.current)){
+            if(postLiked !== wasPostLikedRef.current){
                 console.log('request sent')
                 const result = await togglePostLike()
                 wasPostLikedRef.current = postLiked
                 setPostLikeCount(result)
 
             }
-        }, 1000)
+        }, 500)
 
     }, [postLiked])
 
@@ -132,7 +136,11 @@ function PostCard({post}){
 
             <div className='w-full'>
                 <div className='flex justify-between'>
-                    <div className='flex'>
+                    <div onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/user/${user?.username}`)
+
+                        }} className='flex'>
                         <div className='relative self-start group'>
                             <p className="text-sm font-semibold hover:underline">{user?.fullname?.toUpperCase()}</p>
                             <div className="z-10 absolute rounded-xl top-5 bg-white left-0 border-[1px] p-4 opacity-0 invisible group-hover:visible group-hover:opacity-100 group-hover:delay-500">
@@ -157,6 +165,7 @@ function PostCard({post}){
                 </div>
 
                 <div className="mb-2">
+                    {repliedTo && <p className="text-sm font-semibold text-gray-500 ">Replying to <span className="text-blue-500">@{repliedTo}</span></p>}
                     <p className='tracking-normal leading-tight text-[15px]'>{post?.text}</p>
 
                     {mediaLength > 0 &&
@@ -177,7 +186,7 @@ function PostCard({post}){
                 <div className='mt-2 flex justify-between mt-2'>
                     <button onClick={(e) => handelPostReply(e)} className='flex items-center'><img className='h-5 w-5' src="../../../comment.png" alt="" />{postReplyCount || 0}</button>
                     <button className='flex items-center'><img className='mr-1 h-4 w-4' src="../../../repost.png" alt="" />0</button>
-                    <button onClick={(e) => handlePostLike(e, post?._id)} className='flex items-center'><img className={`mr-1 h-4 w-4 ${postLiked && 'bg-red-200'}`} src="../../../heart.png" alt="" />{postLikeCount || 0}</button>
+                    <button onClick={(e) => handlePostLike(e)} className='flex items-center'><img className={`mr-1 h-4 w-4 ${postLiked && 'bg-red-200'}`} src="../../../heart.png" alt="" />{postLikeCount || 0}</button>
                     <button className='flex items-center'><img className='mr-1 h-4 w-4' src="../../../bar-chart.png" alt="" />0</button>
                 </div>
             </div>

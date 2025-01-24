@@ -24,7 +24,7 @@ const verifyJwtToken = asyncHandler(async (req, res, next) => {
         if(!user) throw new ApiError(400, 'token mismatch')
 
         req.user = user
-
+        
         return next()
 
     } catch (error) {

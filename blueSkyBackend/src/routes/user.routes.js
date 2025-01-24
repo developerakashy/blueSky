@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getLoggedInUser, isUsernameAvailable, login, logout, register, updateProfile, userProfile  } from "../controllers/user.contollers.js";
+import { getLoggedInUser, isUsernameAvailable, login, logout, register, updateProfile, getUserProfile  } from "../controllers/user.contollers.js";
 import verifyJwtToken from "../middlewares/auth.middlewares.js";
 import { upload } from "../middlewares/multer.middlewares.js";
 
@@ -11,7 +11,7 @@ router.route('/username').get(isUsernameAvailable)
 
 //secured routes
 router.route('/loggedin').get(verifyJwtToken, getLoggedInUser)
-router.route('/:username').get(verifyJwtToken, userProfile)
+router.route('/:username').get(verifyJwtToken, getUserProfile)
 router.route('/update-profile').post(verifyJwtToken, upload.fields([
     {
         name: 'avatarImage',

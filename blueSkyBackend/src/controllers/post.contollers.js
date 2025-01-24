@@ -7,11 +7,15 @@ import mongoose from "mongoose";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Like } from "../models/like.models.js";
 import { User } from "../models/user.models.js";
+import { io } from "../app.js";
+import { Notification, NotificationType } from "../models/notification.models.js";
+import { type } from "os";
 
 const publishPost = asyncHandler(async (req, res) => {
     const { text, parentPostId } = req.body
     const { mediaFiles = [] } = req.files
 
+    let parentPostInfo
     const publicIds = []
     const mediaFileUrls =  []
     const publish = {}
@@ -23,6 +27,7 @@ const publishPost = asyncHandler(async (req, res) => {
             const parentPost = await Post.findById(parentPostId)
             if(!parentPost) throw new ApiError(400, 'Parent post not found')
 
+            parentPostInfo = parentPost
             publish.parentPost = parentPostId
         }
 
@@ -57,6 +62,29 @@ const publishPost = asyncHandler(async (req, res) => {
             await Like.create({
                 postId: post._id
             })
+
+            if(parentPostInfo){
+                const receiverUser = await User.findById(parentPostInfo?.userId)
+
+                const notificationCreated = await Notification.create({
+                    senderUserId: req?.user?._id,
+                    receiverUserId: receiverUser?._id,
+                    type: NotificationType.REPLY,
+                    message: postCreated?._id?.toString(),
+                    relatedPostId: parentPostInfo?._id
+                })
+
+                if(!notificationCreated) throw new ApiError(400, 'error creating notification')
+
+
+                io.to(parentPostInfo?.userId.toString()).emit('newNotification', {
+                    senderUserId: req?.user,
+                    receiverUserId: receiverUser,
+                    type: notificationCreated?.type,
+                    message: postCreated,
+                    relatedPostId: parentPostInfo
+                })
+            }
 
             return res.status(200).json(new ApiResponse(200, postCreated, 'Post published successfully'))
         } catch (error) {
@@ -302,6 +330,24 @@ const getAllPosts = asyncHandler(async (req, res) => {
     }
 })
 
+const getUserPosts = asyncHandler(async (req, res) => {
+    const { username } = req.params
+    const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
+
+    try {
+        const userInfo = await User.findOne({username})
+
+        if(!userInfo) throw new ApiError(400, 'user does not exist')
+
+        const posts = await userPosts(userInfo, currentUser)
+        const replies = await userReplies(userInfo, currentUser)
+        const liked = await postsLiked(userInfo, currentUser)
+
+        return res.status(200).json(new ApiResponse(200, {posts, replies, liked}, "user posts fetched successfully"))
+    } catch (error) {
+        throw new ApiError(400, error?.message || 'error fetching posts')
+    }
+})
 
 
 const postDetail = async (postId, currentUser) => {
@@ -352,7 +398,9 @@ const postDetail = async (postId, currentUser) => {
         {
             $addFields: {
                 likeCount: {
-                    $size: '$postLikes.userIdArray'
+                    $size: {
+                        $ifNull: [{ $first: '$postLikes.userIdArray' }, []]
+                    }
                 },
                 userLiked: {
                     $in: [currentUser, {$ifNull: [{ $first: '$postLikes.userIdArray' }, []]}]
@@ -430,7 +478,9 @@ const postReplies = async (postId, currentUser) => {
         {
             $addFields: {
                 likeCount: {
-                    $size: {$first: '$postLikes.userIdArray'}
+                    $size: {
+                        $ifNull: [{ $first: '$postLikes.userIdArray' }, []]
+                    }
                 },
                 userLiked: {
                     $in: [currentUser, {$ifNull: [{ $first: '$postLikes.userIdArray' }, []]}]
@@ -532,7 +582,9 @@ const parentPostHierarchy = async (postId, currentUser) => {
         {
             $addFields: {
                 'hierarchy.likeCount': {
-                    $size: {$first: '$postLikes.userIdArray'}
+                    $size: {
+                        $ifNull: [{ $first: '$postLikes.userIdArray' }, []]
+                    }
                 },
                 'hierarchy.userLiked': {
                     $in: [currentUser, {$ifNull: [{ $first: '$postLikes.userIdArray' }, []]}]
@@ -557,10 +609,293 @@ const parentPostHierarchy = async (postId, currentUser) => {
     return result[0]?.hierarchy || []
 }
 
+const userPosts = async (user, currentUser) => {
+    const result = await Post.aggregate([
+        {
+            $match: {
+                userId: user?._id,
+                parentPost: null
+            }
+        },
+
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'userInfo'
+            }
+        },
+        {
+            $addFields: {
+                userId: {
+                    $first: '$userInfo'
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'posts',
+                localField: '_id',
+                foreignField: 'parentPost',
+                as: 'replies'
+            }
+        },
+        {
+            $addFields: {
+                replyCount: {
+                    $size: '$replies'
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'likes',
+                localField: '_id',
+                foreignField: 'postId',
+                as: 'postLikes'
+            }
+        },
+        {
+            $addFields: {
+                likeCount: {
+                    $size: {
+                        $ifNull: [{ $first: '$postLikes.userIdArray' }, []]
+                    }
+                },
+                userLiked: {
+                    $in: [currentUser, {$ifNull: [{ $first: '$postLikes.userIdArray' }, []]}]
+                }
+            }
+        },
+        {
+            $project: {
+                text: 1,
+                mediaFiles: 1,
+                userId: {
+                    _id: 1,
+                    fullname: 1,
+                    username: 1,
+                    email: 1,
+                    avatar: 1,
+                    coverImage: 1,
+                    about: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    isVerified: 1
+                },
+                parentPost: 1,
+                isPublic: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                replyCount: 1,
+                likeCount: 1,
+                userLiked: 1
+
+            }
+        }
+    ])
+
+    return result
+}
+
+const userReplies = async (user, currentUser) => {
+    const result = await Post.aggregate([
+        {
+            $match: {
+                userId: user?._id,
+                parentPost: { $ne: null }
+            }
+        },
+
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'userInfo'
+            }
+        },
+        {
+            $addFields: {
+                userId: {
+                    $first: '$userInfo'
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'posts',
+                localField: 'parentPost',
+                foreignField: '_id',
+                as: 'parentPost'
+            }
+        },
+        {
+            $lookup: {
+                from: 'posts',
+                localField: '_id',
+                foreignField: 'parentPost',
+                as: 'replies'
+            }
+        },
+        {
+            $addFields: {
+                replyCount: {
+                    $size: '$replies'
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'likes',
+                localField: '_id',
+                foreignField: 'postId',
+                as: 'postLikes'
+            }
+        },
+        {
+            $addFields: {
+                likeCount: {
+                    $size: {
+                        $ifNull: [{ $first: '$postLikes.userIdArray' }, []]
+                    }
+                },
+                userLiked: {
+                    $in: [currentUser, {$ifNull: [{ $first: '$postLikes.userIdArray' }, []]}]
+                }
+            }
+        },
+        {
+            $project: {
+                text: 1,
+                mediaFiles: 1,
+                userId: {
+                    _id: 1,
+                    fullname: 1,
+                    username: 1,
+                    email: 1,
+                    avatar: 1,
+                    coverImage: 1,
+                    about: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    isVerified: 1
+                },
+                parentPost: 1,
+                isPublic: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                replyCount: 1,
+                likeCount: 1,
+                userLiked: 1
+
+            }
+        }
+    ])
+
+    return result
+}
+
+const postsLiked = async (user, currentUser) => {
+    const result = await Like.aggregate([
+        {
+            $match: {
+                userIdArray: new mongoose.Types.ObjectId(user?._id)
+            }
+        },
+        {
+            $lookup: {
+                from: 'posts',
+                localField: 'postId',
+                foreignField: '_id',
+                as: 'postsLiked'
+            }
+        },
+        {
+            $project: {
+                postsLiked: 1
+            }
+        },
+        {
+            $unwind: '$postsLiked'
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'postsLiked.userId',
+                foreignField: '_id',
+                as: 'userInfo'
+            }
+        },
+        {
+            $addFields: {
+                userId: {
+                    $first: '$userInfo'
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'posts',
+                localField: 'postsLiked._id',
+                foreignField: 'parentPost',
+                as: 'replies'
+            }
+        },
+        {
+            $addFields: {
+                replyCount: {
+                    $size: '$replies'
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'likes',
+                localField: 'postsLiked._id',
+                foreignField: 'postId',
+                as: 'postLikes'
+            }
+        },
+        {
+            $addFields: {
+                likeCount: {
+                    $size: {$first: '$postLikes.userIdArray'}
+                },
+                userLiked: {
+                    $in: [currentUser, {$ifNull: [{$first: '$postLikes.userIdArray'}, []]}]
+                }
+            }
+        },
+        {
+            $group: {
+                _id: '$postsLiked._id',
+                text: {$first: '$postsLiked.text'},
+                mediaFiles: {$first: '$postsLiked.mediaFiles'},
+                userId: {$first: '$userId'},
+                parentPost: {$first: '$postsLiked.parentPost'},
+                isPublic: {$first: '$postsLiked.isPublic'},
+                createdAt: {$first: '$postsLiked.createdAt'},
+                updatedAt: {$first: '$postsLiked.updatedAt'},
+                replyCount: {$first: '$replyCount'},
+                likeCount: {$first: '$likeCount'},
+                userLiked: {$first: '$userLiked'},
+
+            }
+        }
+    ])
+
+    return result
+}
+
 export {
     publishPost,
     updatePost,
     deletePost,
     getPostById,
     getAllPosts,
+    getUserPosts,
+    getUserReplies,
+    getUserLikedPosts
 }

@@ -2,6 +2,8 @@ import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import express from 'express'
 import cors from 'cors'
+import { createServer } from 'node:http'
+import { Server } from 'socket.io'
 
 import userRouter from './routes/user.routes.js'
 import postRouter from './routes/post.routes.js'
@@ -11,11 +13,34 @@ import followRouter from './routes/follow.routes.js'
 import { ApiError } from './utils/ApiError.js'
 
 const app = express()
+const server = createServer(app)
+export const io = new Server(server)
 
 app.use(cors({
     origin: process.env.CORS_URL,
     credentials: true
 }))
+
+io.on('connection', (socket) => {
+    console.log('user connected')
+
+    const userId = socket.handshake.query.userId
+
+    if(userId){
+        socket.join(userId)
+        console.log(`user joined their notification room: ${userId}`)
+
+
+    }
+
+
+    socket.on('disconnect', () => {
+        console.log('disconnected')
+    })
+})
+
+
+
 
 
 
@@ -48,4 +73,4 @@ app.use((err, req, res, next) => {
     }
 });
 
-export default app
+export default server

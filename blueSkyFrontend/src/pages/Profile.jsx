@@ -1,39 +1,58 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "../context/userContext";
 import usePosts from "../hooks/usePosts";
 import PostCard from "../components/PostCard";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 import EditProfile from "../components/EditProfile";
 
 function Profile(){
     const { user: userLoggedIn } = useUser()
     const { username } = useParams()
+    const navigate = useNavigate()
+
+    const [data, setData] = useState({posts: [], replies: [], userLiked: []})
     const [user, setUser] = useState(null)
-    const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
     const [edit, setEdit] = useState(false)
-    console.log(username)
+    const [activeSection, setActiveSection] = useState('posts')
 
-    // const queryParams = useMemo(() => ({userId: user?._id}), [user])
-    // const {posts, loading, error} = usePosts(queryParams)
+    const [followed, setFollowed] = useState(user?.userFollowed)
+    const [followerCount, setFollowerCount] = useState(user?.followerCount)
+    let wasFollowedRef = useRef(user?.userFollowed)
+    let followTimeoutRef = useRef()
+
+
+    const renderPost = () => {
+        switch(activeSection){
+            case 'posts':
+                return data.posts.map((post) => <PostCard key={post._id} post={post}/>);
+            case 'replies':
+                return data.replies.map((post) => <PostCard key={post._id} post={post}/>);
+            case 'userLiked':
+                return data.userLiked.map((post) => <PostCard key={post._id} post={post}/>);
+            default:
+                return null
+        }
+    }
 
     useEffect(() => {
         const fetchUserInfo = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8003/user/${username}`, {withCredentials: true})
-                console.log(data)
-                setPosts(data.data.userPosts)
-                setUser(data.data.userInfo)
+                const { data: userInfo } = await axios.get(`http://localhost:8003/user/${username}`, {withCredentials: true})
+                const { data } = await axios.get(`http://localhost:8003/post/${username}/posts`, {withCredentials: true})
+                setUser(userInfo.data)
+                setData({posts: data.data.posts, replies: data.data.replies, userLiked: data.data.liked })
                 setLoading(false)
+                console.log(data)
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
         }
 
         fetchUserInfo()
-
-    }, [])
+        document.body.scrollTo(0, 0)
+    }, [username])
 
 
     useEffect(() => {
@@ -44,15 +63,55 @@ function Profile(){
         }
     }, [edit])
 
+    useEffect(() => {
+        wasFollowedRef.current = user?.userFollowed
+        setFollowed(user?.userFollowed)
+        setFollowerCount(user?.followerCount)
+    }, [user])
+
+
+    const handleFollow = () => {
+        if(followTimeoutRef.current){
+            clearTimeout(followTimeoutRef.current)
+
+        }
+        setFollowed(prev => !prev)
+    }
+
+
+    useEffect(() => {
+
+        const toggleFollow = async () => {
+            try {
+                const { data } = await axios.post(`http://localhost:8003/follow/${user?._id}`, {}, {withCredentials:true})
+                console.log(data)
+                return data?.data?.userIdArray?.length
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        console.log(followed, wasFollowedRef)
+        followTimeoutRef.current = setTimeout(async () => {
+            if(followed !== wasFollowedRef.current && user){
+                const res = await toggleFollow()
+                wasFollowedRef.current = followed
+                setFollowerCount(prev => followed ? prev + 1 : prev - 1)
+                console.log('request made')
+            }
+        }, 500)
+
+    }, [followed])
+
 
     return(
         <div className="w-[600px] border-x-[1px]">
-            {edit && <EditProfile setEdit={setEdit}/>}
+            {edit && <EditProfile setEdit={setEdit} user={user} setUser={setUser}/>}
             <div className='sticky z-10 top-0 bg-white flex items-center p-2'>
-                <button className='px-4 rounded-full mr-6'><img className='h-4' src="../../.././back.png" alt="" /></button>
+                <button onClick={() => navigate(-1)} className='px-4 rounded-full mr-6'><img className='h-4' src="../../.././back.png" alt="" /></button>
                 <div>
                     <p className='font-semibold'>{user?.fullname?.toUpperCase()}</p>
-                    <p className="text-sm text-gray-500">100 posts</p>
+                    <p className="text-sm text-gray-500">{data.posts?.length} Posts | {data.replies?.length} Replies | {data.userLiked?.length} Posts Liked</p>
                 </div>
             </div>
 
@@ -63,8 +122,8 @@ function Profile(){
                 </div>
 
                 <div className="text-end px-4 py-3">
-                    {userLoggedIn?.username === username && <button onClick={() => setEdit(true)} className="rounded-full px-4 py-2 bg-stone-200 mr-2">Edit</button>}
-                    <button className="rounded-full px-4 py-2 bg-blue-500 text-white">follow</button>
+                    { userLoggedIn?.username === username ? <button onClick={() => setEdit(true)} className="rounded-full px-4 py-2 bg-stone-200 mr-2">Edit profile</button> :
+                    <button onClick={handleFollow} className={`rounded-full px-4 py-2 border-[1px] font-bold border-gray-200 ${followed ? ' text-black hover:bg-red-200 hover:text-red-600 hover:border-red-300' : 'bg-black text-white'}`}>{followed ? 'unfollow' : 'follow'}</button> }
                 </div>
 
                 <div className="px-4">
@@ -74,8 +133,8 @@ function Profile(){
                     <p className="text-gray-500 mt-2 text-[15px]">Joined October 2023</p>
 
                     <div className="mt-2 flex gap-4">
-                        <button className="hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">129</span> Following</button>
-                        <button className="hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">100</span> Followers</button>
+                        <button onClick={() => navigate('followers')} className="hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{followerCount}</span> Followers</button>
+                        <button onClick={() => navigate('followings')} className="hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{user?.followingCount}</span> Followings</button>
                     </div>
 
                 </div>
@@ -83,16 +142,14 @@ function Profile(){
             </div>
 
             <div className="border-b-[1px] mt-3 flex">
-                <button className="w-full px-4 py-4 hover:bg-gray-100">Posts</button>
-                <button className="w-full px-4 py-4 hover:bg-gray-100">Replies</button>
-                <button className="w-full px-4 py-4 hover:bg-gray-100">Likes</button>
+                <button onClick={() => setActiveSection('posts')} className={`w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'posts' ? 'text-black' : 'text-gray-500'}`}>Posts</button>
+                <button onClick={() => setActiveSection('replies')} className={`w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'replies' ? 'text-black' : 'text-gray-500'}`}>Replies</button>
+                <button onClick={() => setActiveSection('userLiked')} className={`w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'userLiked' ? 'text-black' : 'text-gray-500'}`}>Likes</button>
             </div>
 
             <div>
                 {loading && <p className="h-screen mb-12">'Loading...'</p>}
-                {posts && posts.map((post) =>
-                    <PostCard key={post._id} post={post}/>
-                )}
+                {renderPost()}
             </div>
         </div>
     )
