@@ -42,6 +42,7 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
             formdata.append('parentPostId', parentPost?._id)
         }
         formdata.append('text', text)
+
         files.forEach((file, index) => {
             formdata.append(`mediaFiles`, file)
         })

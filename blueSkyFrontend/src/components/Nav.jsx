@@ -20,14 +20,14 @@ function Nav(){
                 <button onClick={() => navigate(`/notifications`)} className='group w-full px-2'>
                     <p className='text-start text-xl px-4 py-3 pr-12 w-min rounded-full group-hover:bg-slate-100'>Notifications</p>
                 </button>
-                <button className='group w-full px-2'>
+                <button onClick={() => navigate('/chat')} className='group w-full px-2'>
                     <p className='text-start text-xl px-4 py-3 pr-12 w-min rounded-full group-hover:bg-slate-100'>Chat</p>
                 </button>
                 <button onClick={() => navigate(`/user/${user?.username}`)} className='group w-full px-2'>
                     <p className='text-start text-xl px-4 py-3 pr-12 w-min rounded-full group-hover:bg-slate-100'>Profile</p>
                 </button>
-                <button className='group w-full px-2'>
-                    <p className='text-start text-xl px-4 py-3 pr-12 w-min rounded-full group-hover:bg-slate-100'>Bookmark</p>
+                <button onClick={() => navigate(`/bookmarks`)} className='group w-full px-2'>
+                    <p className='text-start text-xl px-4 py-3 pr-12 w-min rounded-full group-hover:bg-slate-100'>Bookmarks</p>
                 </button>
                 <button className='group w-full px-2'>
                     <p className='text-start text-xl px-4 py-3 pr-12 w-min rounded-full group-hover:bg-slate-100'>More</p>

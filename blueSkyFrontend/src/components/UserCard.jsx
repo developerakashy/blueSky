@@ -1,10 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router";
 
 function UserCard({user}){
-
+    const navigate = useNavigate()
 
     return(
-        <div className="flex gap-2 p-3 hover:bg-gray-100">
+        <div onClick={() => navigate(`/user/${user?.username}`)} className="cursor-pointer flex gap-2 p-3 hover:bg-gray-100">
             <div className="min-w-12 flex justify-center">
                 <img className='h-12 w-12 rounded-full object-cover' src={user?.avatar} alt="" />
             </div>

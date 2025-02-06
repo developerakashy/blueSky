@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import axios from 'axios'
 import { isUsernameValid } from "../../utils/validation";
 import { useUser } from "../../context/userContext";
+import { useNavigate } from "react-router";
 
 function StepTwo({updateFormData, nextStep, prevStep, formData}){
     const [username, setUsername] = useState(formData.username)
     const {user, setUser} = useUser()
     const [error, setError] = useState("")
+    const navigate = useNavigate()
 
     const handleNext = async (e) => {
         e.preventDefault()
@@ -23,19 +25,14 @@ function StepTwo({updateFormData, nextStep, prevStep, formData}){
 
 
 
-        const options = {
-            method: 'GET',
-            url: `http://localhost:8001/api/v1/user/username/${username}`,
-            headers: {accept: 'application/json'}
-        };
-
         try {
-            const { data }  = await axios(options);
-            console.log(data);
+            const { data: usernameExist }  = await axios.post(`http://localhost:8003/user/username`, {username});
+            console.log(usernameExist);
+
             updateFormData({username})
-            console.log('user creation successfull')
-            setError("")
-            nextStep()
+
+            // nextStep()
+
 
         } catch (error) {
             console.log(error);
@@ -45,6 +42,27 @@ function StepTwo({updateFormData, nextStep, prevStep, formData}){
 
         }
     }
+
+    const registerUser = async () => {
+        try {
+            const { data } = await axios.post(`http://localhost:8003/user/register`, formData)
+            console.log('user creation successfull')
+            console.log(data)
+            setError("")
+            navigate('/login')
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        if(formData?.username?.trim()){
+            registerUser()
+        }
+    }, [formData])
+
+
 
     const btnDisabled = username?.trim()?.length < 3 ? true : false
 

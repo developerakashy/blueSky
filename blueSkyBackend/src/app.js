@@ -10,6 +10,9 @@ import postRouter from './routes/post.routes.js'
 import replyRouter from './routes/reply.routes.js'
 import likeRouter from './routes/like.routes.js'
 import followRouter from './routes/follow.routes.js'
+import chatRouter from './routes/chat.routes.js'
+import bookmarkRouter from './routes/bookmark.routes.js'
+import repostRouter from './routes/repost.routes.js'
 import { ApiError } from './utils/ApiError.js'
 
 const app = express()
@@ -29,7 +32,6 @@ io.on('connection', (socket) => {
     if(userId){
         socket.join(userId)
         console.log(`user joined their notification room: ${userId}`)
-
 
     }
 
@@ -56,6 +58,9 @@ app.use('/post', postRouter)
 app.use('/reply', replyRouter)
 app.use('/like', likeRouter)
 app.use('/follow', followRouter)
+app.use('/chat', chatRouter)
+app.use('/bookmark', bookmarkRouter)
+app.use('/repost', repostRouter)
 
 app.use((err, req, res, next) => {
     if (err instanceof ApiError) {

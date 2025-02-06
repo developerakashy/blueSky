@@ -34,6 +34,10 @@ const notificationSchema = new Schema({
         type: mongoose.Types.ObjectId,
         ref: 'Post'
     },
+    postReplyId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Post'
+    },
     isViewed: {
         type: Boolean,
         default: false

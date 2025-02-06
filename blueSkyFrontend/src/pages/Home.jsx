@@ -5,7 +5,7 @@ import { ScrollRestoration } from 'react-router'
 import CreatePost from '../components/CreatePost'
 import { useUser } from '../context/userContext'
 import { usePostContext } from '../context/postContext'
-import DirectMessage from './DirectMessage'
+import DirectMessage from './SocketConnection'
 
 function Home(){
     const {publishPost, setPublishPost} = useUser()
@@ -38,7 +38,7 @@ function Home(){
 
     return(
         <div className='w-[600px] border-x-[1px]'>
-            
+
             {loading && <p className='h-screen'>Loading...</p>}
             {posts.length > 0 && posts.map(post => post?._id &&
                 <PostCard key={post._id} post={post}/>

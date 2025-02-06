@@ -37,7 +37,7 @@ const userSchema = new Schema({
     },
     coverImage: {
         type: String,
-        
+
     },
     password: {
         type: String,
@@ -50,10 +50,10 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
-    userVerificationToken: {
+    verificationToken: {
         type: String,
     },
-    tokenExpiry: {
+    verificationTokenExpiry: {
         type: String
     }
 

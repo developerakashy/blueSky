@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncRequestHandler.js";
 import { Notification, NotificationType } from "../models/notification.models.js";
 import { io } from "../app.js";
+import { User } from "../models/user.models.js";
 
 const toggleFollow = asyncHandler(async (req, res) => {
     const { userId } = req.params
@@ -20,7 +21,8 @@ const toggleFollow = asyncHandler(async (req, res) => {
 
         const notificationExist = await Notification.findOne({
             senderUserId: req?.user?._id,
-            receiverUserId: receiverUser?._id
+            receiverUserId: receiverUser?._id,
+            type: {$in: [NotificationType.FOLLOW, NotificationType.UNFOLLOW]}
         })
 
         const userFollowed = follow?.userIdArray.indexOf(req.user._id) === -1 ? false: true
@@ -46,10 +48,11 @@ const toggleFollow = asyncHandler(async (req, res) => {
                 if(!notificationCreated) throw new ApiError(400, 'error creating notification')
 
                 io.to(receiverUser?._id?.toString()).emit('newNotification', {
+                    _id: notificationCreated?._id,
                     senderUserId: req?.user,
                     receiverUserId: receiverUser,
                     type: NotificationType.FOLLOW,
-                    message: 'Followed you'
+                    message: notificationCreated.message
                 })
             } else {
                 await Notification.findByIdAndUpdate(notificationExist?._id,
@@ -96,7 +99,8 @@ const userFollowers = asyncHandler(async (req, res) => {
     const { userId } = req.params
 
     try {
-        const userFollowersInfo =  await followers(userId)
+        const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req?.user?._id) : ''
+        const userFollowersInfo =  await followers(userId, currentUser)
 
         return res.status(200).json(new ApiResponse(200, userFollowersInfo, 'ok'))
     } catch (error) {
@@ -117,7 +121,7 @@ const userFollowings = asyncHandler(async (req, res) => {
 })
 
 
-const followers = async (userId) => {
+const followers = async (userId, currentUser) => {
     const result = await Follow.aggregate([
         {
             $match: {
@@ -136,6 +140,26 @@ const followers = async (userId) => {
             }
         },
         {
+            $lookup: {
+                from: 'follows',
+                localField: 'userIdArray',
+                foreignField: 'userId',
+                as: 'followers'
+            }
+        },
+        {
+            $addFields: {
+                userFollowed: {
+                    $in : [currentUser, {$ifNull: [{$first: '$followers.userIdArray'}, []]}]
+                },
+                followerCount: {
+                    $size: {
+                        $ifNull: [{$first: '$followers.userIdArray'}, []]
+                    }
+                }
+            }
+        },
+        {
             $unwind: '$userInfo'
         },
         {
@@ -150,6 +174,8 @@ const followers = async (userId) => {
                 isVerified: '$userInfo.isVerified',
                 createdAt: '$userInfo.createdAt',
                 updatedAt: '$userInfo.updatedAt',
+                userFollowed: 1,
+                followerCount: 1
 
             }
         }

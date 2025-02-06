@@ -7,21 +7,30 @@ import axios from 'axios'
 
 function Post({post, postReplies, parentPost}){
     const {publishPost, setPublishPost} = useUser()
-    const user = post?.userId
-
-    const [posts, setPosts] = useState(postReplies)
-    const [postReplyCount, setPostReplyCount] = useState(post?.replyCount || 0)
-    const [postLikeCount, setPostLikeCount] = useState(post?.likeCount || 0)
-    const [postLiked, setPostLiked] = useState(post?.userLiked || false)
-
     const navigate = useNavigate()
     const [previewImage, setPreviewImage] = useState(false)
     const [previewVideo, setPreviewVideo] = useState(false)
     const [currentIndex, setCurrentIndex] = useState(0)
 
-    let likeTimeoutRef = useRef(null)
-    let wasPostLikedRef = useRef(post?.userLiked || false)
+    const [posts, setPosts] = useState(postReplies)
+    const [postReplyCount, setPostReplyCount] = useState(post?.replyCount || 0)
+    const [postLikeCount, setPostLikeCount] = useState(post?.likeCount || 0)
+    const [postRepostCount, setPostRepostCount] = useState(post?.repostCount || 0)
 
+    const [postLiked, setPostLiked] = useState(post?.userLiked || false)
+    const [postBookmarked, setPostBookmarked] = useState(post?.userBookmarked || false)
+    const [postReposted, setPostReposted] = useState(post?.userReposted || false)
+
+
+    let likeTimeoutRef = useRef(null)
+    let bookmarkTimeoutRef = useRef(null)
+    let repostTimeoutRef = useRef(null)
+
+    let wasPostLikedRef = useRef(post?.userLiked || false)
+    let wasPostBookmarkedRef = useRef(post?.userBookmarked || false)
+    let wasPostRepostedRef = useRef(post?.userReposted || false)
+
+    const user = post?.userId
     const imageUrl = post?.mediaFiles
     const mediaLength = imageUrl?.length
 
@@ -29,8 +38,15 @@ function Post({post, postReplies, parentPost}){
         setPosts(postReplies)
         setPostLikeCount(post?.likeCount)
         setPostReplyCount(post?.replyCount)
+        setPostRepostCount(post?.repostCount)
+
         setPostLiked(post?.userLiked)
+        setPostBookmarked(post?.userBookmarked)
+        setPostReposted(post?.userReposted)
+
         wasPostLikedRef.current = post?.userLiked
+        wasPostBookmarkedRef.current = post?.userBookmarked
+        wasPostRepostedRef.current = post?.userReposted
     }, [postReplies, post])
 
     useEffect(() => {
@@ -126,7 +142,71 @@ function Post({post, postReplies, parentPost}){
 
     }, [postLiked])
 
+    const handleBookmark = (e) => {
+        e.stopPropagation()
 
+        if(bookmarkTimeoutRef.current){
+            clearTimeout(bookmarkTimeoutRef.current)
+        }
+
+        setPostBookmarked(prev => !prev)
+    }
+
+    useEffect(() => {
+        const toggleBookmark = async () =>  {
+            try {
+                const { data } = await axios.post(`http://localhost:8003/bookmark/${post?._id}`, {}, {withCredentials: true})
+
+                return data.data?.postIdArray?.indexOf(post?._id) === -1 ? false : true
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        bookmarkTimeoutRef.current = setTimeout(async () => {
+            if(postBookmarked !== wasPostBookmarkedRef.current){
+                console.log('request sent')
+                const status = await toggleBookmark()
+                wasPostBookmarkedRef.current = status
+                post.userBookmarked = status
+            }
+        }, 500);
+
+    }, [postBookmarked])
+
+    const handleRepost = (e) => {
+        e.stopPropagation()
+
+        if(repostTimeoutRef.current){
+            clearTimeout(repostTimeoutRef.current)
+        }
+
+        setPostRepostCount(prev => postReposted ? prev - 1 : prev + 1)
+        setPostReposted(prev => !prev)
+    }
+
+    useEffect(() => {
+        const togglePostRepost = async () => {
+            try {
+                const { data } = await axios.post(`http://localhost:8003/repost/${post?._id}`, {}, {withCredentials: true})
+
+                return data?.data?.repostCount || 0
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        repostTimeoutRef.current = setTimeout(async () => {
+            if(postReposted !== wasPostRepostedRef.current){
+                const repostCount = await togglePostRepost()
+                wasPostRepostedRef.current = postReposted
+                setPostRepostCount(repostCount)
+                console.log('request send')
+            }
+
+        }, 700)
+
+    }, [postReposted])
 
 
     return(
@@ -178,9 +258,9 @@ function Post({post, postReplies, parentPost}){
 
                 <div className='flex justify-between mx-4 py-3 border-y-[1px]'>
                     <button onClick={(e) => handelPostReply(e)} className='flex items-center'><img className='h-6 w-6' src="../../../comment.png" alt="" />{postReplyCount}</button>
-                    <button className='flex items-center'><img className='mr-1 h-5 w-5' src="../../../repost.png" alt="" />0</button>
-                    <button onClick={(e) => handlePostLike(e)} className='flex items-center'><img className={`mr-1 h-5 w-5 ${postLiked && 'bg-red-200'}`} src="../../../heart.png" alt="" />{postLikeCount}</button>
-                    <button className='flex items-center'><img className='mr-1 h-5 w-5' src="../../../bar-chart.png" alt="" />2</button>
+                    <button onClick={(e) => handleRepost(e)} className='flex items-center'><img className={`mr-1 h-5 w-5 ${postReposted ? 'bg-green-200' : ''}`} src="../../../repost.png" alt="" />{postRepostCount}</button>
+                    <button onClick={(e) => handlePostLike(e)} className='flex items-center'><img className={`mr-1 h-5 w-5 ${postLiked ? 'bg-red-200' : ''}`} src="../../../heart.png" alt="" />{postLikeCount}</button>
+                    <button onClick={(e) => handleBookmark(e)} className='flex items-center'><img className={`mr-1 h-5 w-5 ${postBookmarked ? 'bg-blue-200' : ''}`} src="../../../bookmark.png" alt="" /></button>
                 </div>
 
                 <div className='flex justify-between p-4 border-b-[1px]'>

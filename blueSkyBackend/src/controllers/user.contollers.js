@@ -7,6 +7,10 @@ import { destroyOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js"
 import fs from 'fs'
 import { Post } from "../models/post.models.js"
 import mongoose from "mongoose"
+import { Notification } from "../models/notification.models.js"
+import { postDetail } from "./post.contollers.js"
+import { sendEmail } from "../utils/mail.js"
+import { Bookmark } from "../models/bookmark.models.js"
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -39,6 +43,9 @@ const register = asyncHandler(async (req, res) => {
     }
 
     try {
+        const userExist = await User.findOne({email})
+
+        if(userExist) throw new ApiError(200, {userExist: true})
 
         const user = await User.create({
             fullname,
@@ -48,6 +55,10 @@ const register = asyncHandler(async (req, res) => {
         })
 
         if(!user) throw new ApiError(400, 'something went wrong while registring user')
+
+        await Bookmark.create({
+            userId: user?._id
+        })
 
         return res.status(200).json(new ApiResponse(200, user, 'user creation successfull'))
 
@@ -104,19 +115,30 @@ const getLoggedInUser = asyncHandler(async (req, res) => {
 
 })
 
-const isUsernameAvailable = asyncHandler(async (req, res) => {
-    const { username } = req?.body
+const isUserAvailable = asyncHandler(async (req, res) => {
+    const { username, email } = req?.body
 
-    if(!username?.trim()) throw new ApiError(400, 'username field is mandatory')
+    if(!username?.trim() && !email?.trim()) throw new ApiError(400, 'username or email field is mandatory')
 
     try {
-        const user = await User.findOne({username}).select("username")
+        if(username){
+            const user = await User.findOne({username})
 
-        if(!user) throw new ApiError(400, 'username does not exists')
+            if(!user?.username) return res.status(200).json(new ApiResponse(200, {available: true}, 'username available'))
 
-        return res.status(200).json(new ApiResponse(200, user, 'username exists'))
+            return res.status(200).json(new ApiResponse(200, {available: false}, 'username unavailable'))
+        }
+
+        if(email){
+            const user = await User.findOne({email})
+
+            if(!user?.email) return res.status(200).json(new ApiResponse(200, {exist: false}, 'email address does not exist'))
+
+            return res.status(200).json(new ApiResponse(200, {exist: true}, 'email address exist'))
+        }
+
     } catch (error) {
-        throw new ApiError(400, error?.message || 'username unavailable')
+        throw new ApiError(400, error?.message || 'something went while getting username')
     }
 })
 
@@ -206,7 +228,7 @@ const updateProfile = asyncHandler(async (req, res) => {
 
     const updates = {}
 
-    if(about?.trim()) updates.about = about
+    if(about) updates.about = about
     if(fullname?.trim()) updates.fullname = fullname
 
     let avatarImage
@@ -252,7 +274,7 @@ const updateProfile = asyncHandler(async (req, res) => {
             const avatarImageUrl = req?.user?.avatar?.split('/')
             const public_id = avatarImageUrl[avatarImageUrl.length - 1].split('.')[0]
 
-            if(!(public_id === 'xoghtvakela7cvwnaj4w')){
+            if(public_id && !(public_id === 'xoghtvakela7cvwnaj4w')){
                 const res = await destroyOnCloudinary(public_id)
                 console.log('prev avatar deleted', res)
             }
@@ -264,7 +286,7 @@ const updateProfile = asyncHandler(async (req, res) => {
             const coverImageUrl = req?.user?.coverImage?.split('/')
             const public_id = coverImageUrl[coverImageUrl.length - 1].split('.')[0]
 
-            if(!(public_id === 'gnakonztwpppjgkr6ved')){
+            if(public_id && !(public_id === 'gnakonztwpppjgkr6ved')){
                 const res = await destroyOnCloudinary(public_id)
                 console.log('prev cover image deleted', res)
             }
@@ -307,15 +329,95 @@ const logout = asyncHandler(async (req, res) => {
 
 })
 
-// const notifications = asyncHandler(async (req, res) => {
+const sendUserVerificationEmail = asyncHandler(async (req, res) => {
+
+    try {
+        const mailSent = await sendEmail(req?.user?.email, 'VERIFY', req?.user?._id)
 
 
-//     try {
+        return res.status(200).json(new ApiResponse(200, mailSent, 'mail sent successfully'))
 
-//     } catch (error) {
+    } catch (error) {
+        throw new ApiError(400, error?.message || 'something went wrong while sending verification mail')
+    }
+})
 
-//     }
-// })
+const verifyUserVerificationToken = asyncHandler(async (req, res) => {
+    const { token } = req.body
+
+    try {
+        const user = await User.findOne({verificationToken: token})
+
+        if(!user) throw new ApiError(400, 'invalid token')
+
+        if(user?.verificationTokenExpiry < Date.now()) throw new ApiError(400, 'verification link expired')
+
+        if(user?._id?.toString() !== req?.user?._id?.toString()) throw new ApiError(400, 'user unauthorized to use this link')
+
+        user.isVerified = true
+        user.verificationToken = null
+        user.verificationTokenExpiry = null
+
+        await user.save()
+
+        const userVerified = await User.findById(user?._id).select('-password -refreshToken')
+
+        return res.status(200).json(new ApiResponse(200, userVerified, 'verification successfull'))
+    } catch (error) {
+        throw new ApiError(400, error?.message || 'something went wrong while verifying user')
+    }
+})
+
+const notifications = asyncHandler(async (req, res) => {
+
+    try {
+        const notifications = await Notification.find({
+            receiverUserId: req?.user?._id
+        }).populate('receiverUserId', 'fullname avatar username').sort({createdAt: -1})
+
+        const processedNotification = await Promise.all(
+            notifications.map(async (notification) => {
+
+                const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
+                if(notification.type === 'reply'){
+                    const postReplyId = await postDetail(notification?.postReplyId, currentUser)
+
+                    return {
+                        ...notification._doc,
+                        postReplyId
+                    }
+                } else {
+                    const senderUserId = await User.findById(notification.senderUserId).select('-password -refreshToken')
+                    const relatedPostId = await Post.findById(notification.relatedPostId)
+
+                    return {
+                        ...notification._doc,
+                        senderUserId,
+                        relatedPostId
+                    }
+                }
+            })
+        )
+
+
+        return res.status(200).json(new ApiResponse(200, processedNotification, 'notifications fetched'))
+
+    } catch (error) {
+        throw new ApiError(400, error?.message || 'something went wrong while getting notifications')
+    }
+})
+
+const getUsers = asyncHandler(async (req, res) => {
+
+    try {
+        const users = await User.find({_id:{$ne: null}}).select("-password -refreshToken")
+
+        return res.status(200).json(new ApiResponse(200, users, 'users fetched successfully'))
+
+    } catch (error) {
+        throw new ApiError(400, error?.message || 'something went wrong while getting users')
+    }
+})
 
 
 export {
@@ -323,8 +425,12 @@ export {
     register,
     login,
     getLoggedInUser,
-    isUsernameAvailable,
+    isUserAvailable,
     updateProfile,
     logout,
-    getUserProfile
+    getUserProfile,
+    notifications,
+    sendUserVerificationEmail,
+    verifyUserVerificationToken,
+    getUsers
 }

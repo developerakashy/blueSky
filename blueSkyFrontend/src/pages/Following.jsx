@@ -30,7 +30,7 @@ function FollowingsAndFollowers(){
     useEffect(() => {
         const fetchFollowers = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8003/follow/followers/${user?._id}`)
+                const { data } = await axios.get(`http://localhost:8003/follow/followers/${user?._id}`,{withCredentials: true})
                 console.log(data)
                 setFollowers(data.data)
             } catch (error) {
@@ -40,7 +40,7 @@ function FollowingsAndFollowers(){
 
         const fetchFollowings = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8003/follow/followings/${user?._id}`)
+                const { data } = await axios.get(`http://localhost:8003/follow/followings/${user?._id}`, {withCredentials: true})
                 console.log(data)
                 setFollowings(data.data)
             } catch (error) {

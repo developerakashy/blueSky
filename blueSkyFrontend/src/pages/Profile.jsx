@@ -107,17 +107,17 @@ function Profile(){
     return(
         <div className="w-[600px] border-x-[1px]">
             {edit && <EditProfile setEdit={setEdit} user={user} setUser={setUser}/>}
-            <div className='sticky z-10 top-0 bg-white flex items-center p-2'>
-                <button onClick={() => navigate(-1)} className='px-4 rounded-full mr-6'><img className='h-4' src="../../.././back.png" alt="" /></button>
-                <div>
+            <div className='fixed z-10 top-0 flex justify-center items-center'>
+                <button onClick={() => navigate(-1)} className='p-2 backdrop-blur-md bg-black/10 rounded-full ml-2 mt-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
+                {/* <div>
                     <p className='font-semibold'>{user?.fullname?.toUpperCase()}</p>
                     <p className="text-sm text-gray-500">{data.posts?.length} Posts | {data.replies?.length} Replies | {data.userLiked?.length} Posts Liked</p>
-                </div>
+                </div> */}
             </div>
 
             <div>
                 <div className="relative">
-                    <img className="block h-52 w-full object-cover" src={user?.coverImage} alt="" />
+                    <img className="block p-1 rounded-3xl h-56 w-full object-cover" src={user?.coverImage} alt="" />
                     <img className="border-[6px] border-white mx-4 block h-32 w-32 absolute bottom-[-64px] rounded-full object-cover" src={user?.avatar} alt="" />
                 </div>
 

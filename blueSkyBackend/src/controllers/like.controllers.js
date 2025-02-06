@@ -24,9 +24,10 @@ const togglePostLike = asyncHandler(async (req, res) => {
 
         const notificationExist = await Notification.findOne({
             relatedPostId: post?._id,
-            senderUserId: req?.user?._id
+            senderUserId: req?.user?._id,
+            type: {$in: [NotificationType.LIKE, NotificationType.UNLIKE]}
         })
-        
+
         const userLiked = like?.userIdArray.indexOf(req.user._id) === -1 ? false : true
 
         if(!userLiked){
@@ -43,24 +44,27 @@ const togglePostLike = asyncHandler(async (req, res) => {
 
             if(!notificationExist){
 
-                const notificationCreated = await Notification.create({
-                    senderUserId: req?.user?._id,
-                    receiverUserId: receiverUser?._id,
-                    type: NotificationType.LIKE,
-                    message: 'Liked your post',
-                    relatedPostId: post?._id
-                })
+                if(req.user?._id?.toString() !== receiverUser?._id?.toString()){
+                    const notificationCreated = await Notification.create({
+                        senderUserId: req?.user?._id,
+                        receiverUserId: receiverUser?._id,
+                        type: NotificationType.LIKE,
+                        message: 'Liked your post',
+                        relatedPostId: post?._id
+                    })
 
-                if(!notificationCreated) throw new ApiError(400, 'error creating notification')
+                    if(!notificationCreated) throw new ApiError(400, 'error creating notification')
 
-                io.to(post?.userId?.toString()).emit('newNotification', {
-                    senderUserId: req?.user,
-                    receiverUserId: receiverUser,
-                    type: NotificationType.LIKE,
-                    message: 'Liked your post',
-                    relatedPostId: post
+                    io.to(post?.userId?.toString()).emit('newNotification', {
+                        _id: notificationCreated?._id,
+                        senderUserId: req?.user,
+                        receiverUserId: receiverUser,
+                        type: NotificationType.LIKE,
+                        message: notificationCreated.message,
+                        relatedPostId: post
+                    })
+                }
 
-                })
             } else {
                 await Notification.findByIdAndUpdate(notificationExist?._id,
                     {
