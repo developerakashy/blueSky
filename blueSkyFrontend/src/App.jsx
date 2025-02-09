@@ -16,8 +16,10 @@ import Chats from './pages/Chats'
 import ChatMessages from './pages/ChatMessages'
 import VerifyUser from './pages/VerifyUser'
 import Bookmark from './pages/Bookmark'
+import { ToastContainer } from 'react-toastify'
 
 function App() {
+  const [loading, setLoading] = useState(false)
   const [user, setUser] = useState(null)
   const [posts, setPosts] = useState([])
   const [publishPost, setPublishPost] = useState(false)
@@ -32,10 +34,10 @@ function App() {
 
       try {
         const { data } = await axios.get('http://localhost:8003/user/loggedin', {withCredentials: true})
-        console.log(data.data)
-        setUser(data.data)
+        console.log(data?.data)
+        setUser(data?.data)
       } catch (error) {
-        console.log(error.response.data.message)
+        console.log(error?.response?.data?.message)
       }
     }
     getLoggedInUser()
@@ -61,28 +63,6 @@ function App() {
 
 
 
-  const login = async (username, email, password) => {
-    const options = {
-      method: 'post',
-      url: 'http://localhost:8003/user/login',
-      data: {
-        username: username,
-        email: email,
-        password: password
-      },
-      withCredentials: true
-    }
-
-    try {
-      const { data } = await axios(options)
-      console.log(data)
-      return data
-    } catch (error) {
-      console.log(error)
-      return error.status === 200
-    }
-  }
-
   const logout = async () => {
     try {
       const { data } = await axios.post('http://localhost:8003/user/logout',{}, {withCredentials: true})
@@ -94,10 +74,19 @@ function App() {
   }
 
   return (
-    <UserContextProvider value={{user, chats, setChats, messages, setMessages, notifications, setNotifications, publishPost, setPublishPost, setUser, login, logout}}>
+    <UserContextProvider value={{user, chats, setChats, messages, setMessages, notifications, setNotifications, publishPost, setPublishPost, setUser, logout, loading, setLoading}}>
       <PostContextProvider value={{posts, setPosts}}>
 
       <BrowserRouter>
+      {loading && <div className='z-50 fixed bg-blue-50/50  right-0 left-0 top-0 bottom-0 flex flex-col gap-2 justify-center items-center'>
+          <l-mirage
+              size="70"
+              speed="1.5"
+              color="blue"
+          ></l-mirage>
+          {/* <p className='text-white text-lg'>Do not refresh the page</p> */}
+      </div>}
+      <ToastContainer/>
       {/* <ScrollProvider> */}
         <Routes>
           <Route path="auth">

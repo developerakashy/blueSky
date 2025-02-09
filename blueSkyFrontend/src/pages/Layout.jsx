@@ -4,6 +4,7 @@ import Nav from '../components/Nav'
 import { useUser } from '../context/userContext'
 import CreatePost from '../components/CreatePost'
 import SocketConnection from './SocketConnection'
+import { ToastContainer } from 'react-toastify'
 
 function Layout(){
     const {publishPost, setPublishPost, setNotifications} = useUser()
@@ -19,6 +20,8 @@ function Layout(){
             <div className='sticky top-0 border-r-[1px] w-[380px] h-screen'>
                 Bottom
             </div>
+
+            
         </div>
     )
 }

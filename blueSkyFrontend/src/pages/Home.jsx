@@ -37,7 +37,7 @@ function Home(){
 
 
     return(
-        <div className='w-[600px] border-x-[1px]'>
+        <div className='w-[600px] border-x-1 border-slate-200'>
 
             {loading && <p className='h-screen'>Loading...</p>}
             {posts.length > 0 && posts.map(post => post?._id &&

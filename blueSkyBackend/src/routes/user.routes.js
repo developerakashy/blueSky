@@ -26,6 +26,6 @@ router.route('/update-profile').post(verifyJwtToken, upload.fields([
 ]),  updateProfile)
 router.route('/logout').post(verifyJwtToken, logout)
 router.route('/send-verification-email').post(verifyJwtToken, sendUserVerificationEmail)
-router.route('/verify-token').post(verifyJwtToken, verifyUserVerificationToken)
+router.route('/verify-code').post(verifyJwtToken, verifyUserVerificationToken)
 
 export default router

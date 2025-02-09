@@ -3,30 +3,36 @@ import bcrypt from 'bcrypt'
 import { User } from '../models/user.models.js'
 import { ApiError } from './ApiError.js'
 import { Resend } from 'resend';
+import { response } from 'express';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 const sendEmail = async (email, emailType, userId) => {
 
     try {
-
-
+        let updatedUser
         const user = await User.findById(userId)
 
         if(!user) throw new ApiError(400, 'user not found')
 
-        const tokenStatus = user?.verificationToken && user?.verificationTokenExpiry > Date.now()
+        const codeExpired = !user?.verificationCode || parseInt(user?.verificationCodeExpiry) < Date.now()
+        console.log(user)
 
-        // if(tokenStatus)
-        const token = await bcrypt.hash(userId.toString(), 10)
+        const verificationCode = parseInt((Math.random() * 899999) + 100000)
 
-        if(emailType === 'VERIFY'){
-            await User.findByIdAndUpdate(userId?.toString(),
+        if(emailType === 'VERIFY' && codeExpired){
+            updatedUser = await User.findByIdAndUpdate(userId,
                 {
-                    verificationToken: token,
-                    verificationTokenExpiry: Date.now() + (24 * 60 * 60 * 1000)
+                    verificationCode,
+                    verificationCodeExpiry: Date.now() + (15 * 60 * 1000)
+                },
+                {
+                  new: true
                 }
             )
+
+
+
 
         } else {
 
@@ -38,14 +44,14 @@ const sendEmail = async (email, emailType, userId) => {
             subject: emailType === 'VERIFY' ? 'Verify Your Email' : 'Reset Your Password',
             html: `
               <div style="font-family: Arial, sans-serif; padding: 20px;">
-                <h2>${emailType === 'VERIFY' ? 'Email Verification' : 'Password Reset'}</h2>
-                <p>Click the button below to ${
+                <h2 style="margin-bottom:0">${emailType === 'VERIFY' ? 'BlueSky Email Verification' : 'Password Reset'}</h2>
+                <p>6-digit verification code to ${
                   emailType === 'VERIFY' ? 'verify your email' : 'reset your password'
                 }:</p>
-                <a href="${process.env.DOMAIN}/verify-token?token=${token}"
-                   style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-                  ${emailType === 'VERIFY' ? 'Verify Email' : 'Reset Password'}
-                </a>
+                <p
+                   style="font-size: 1.8rem; margin: 0 0; color: black">
+                  ${emailType === 'VERIFY' ? codeExpired ? verificationCode : user?.verificationCode :  'Reset Password'}
+                </p>
                 <p style="margin-top: 20px; color: #666;">
                   If you didn't request this, please ignore this email.
                 </p>
@@ -53,9 +59,9 @@ const sendEmail = async (email, emailType, userId) => {
             `
         }
 
-        const response = await sgMail.send(msg)
+        await sgMail.send(msg)
 
-        return response
+        return codeExpired ? updatedUser?.verificationCodeExpiry : user?.verificationCodeExpiry
 
 
     } catch (error) {

@@ -50,11 +50,11 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
-    verificationToken: {
-        type: String,
+    verificationCode: {
+        type: Number,
     },
-    verificationTokenExpiry: {
-        type: String
+    verificationCodeExpiry: {
+        type: Number
     }
 
 }, {timestamps: true})

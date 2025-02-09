@@ -5,10 +5,12 @@ import { ToastContainer, toast } from 'react-toastify'
 import debounce from '../utils/debounce'
 import axios from "axios";
 import { useNavigate } from "react-router";
+import { useUser } from "../context/userContext";
 
 function Registration(){
+    const {loading, setLoading} = useUser()
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(false)
+    // const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [formData, setFormData] = useState({
         firstName: '',
@@ -27,6 +29,9 @@ function Registration(){
 
     const [errors, setErrors] = useState({})
 
+    useEffect(() => {
+        setLoading(false)
+    })
 
     const handleInputChange = async (e) => {
         let {name, value} = e.target
@@ -220,7 +225,7 @@ function Registration(){
                 setShowPassword(false)
                 setErrors({})
                 navigate('/')
-            }, 1000)
+            }, 500)
 
 
         } catch (error) {
@@ -232,7 +237,7 @@ function Registration(){
             setTimeout(() => {
                 setLoading(false)
 
-            }, 1000)
+            }, 600)
         }
     }
 
@@ -353,14 +358,14 @@ function Registration(){
 
             </form>
 
-            {loading && <div className='bg-white/60 fixed border-1 right-0 left-0 top-0 bottom-0 flex justify-center items-center'>
+            {/* {loading && <div className='bg-white/60 fixed border-1 right-0 left-0 top-0 bottom-0 flex justify-center items-center'>
                 <l-mirage
                     size="80"
                     speed="1.5"
                     color="blue"
                 ></l-mirage>
-            </div>}
-            <ToastContainer/>
+            </div>} */}
+            {/* <ToastContainer/> */}
         </div>
     )
 }

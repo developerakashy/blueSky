@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useUser } from "../context/userContext";
 import { useNavigate } from "react-router";
 import { usePostContext } from "../context/postContext";
+import { Bookmark, Heart, MessageCircleMore, MessageSquareText, MessageSquareTextIcon, Repeat2 } from "lucide-react";
 
 
 
@@ -149,7 +150,7 @@ function PostCard({post, repliedTo}){
                 setPostLikeCount(result)
 
             }
-        }, 500)
+        }, 700)
 
     }, [postLiked])
 
@@ -182,7 +183,7 @@ function PostCard({post, repliedTo}){
                 wasPostBookmarkedRef.current = status
                 post.userBookmarked = status
             }
-        }, 500);
+        }, 700);
 
     }, [postBookmarked])
 
@@ -224,7 +225,7 @@ function PostCard({post, repliedTo}){
 
     return(
         <>
-        <div onClick={() => navigate(`/post/${post?._id}`)} className={`cursor-pointer hover:bg-slate-50 border-b-[1px] px-5 py-3 flex gap-2`}>
+        <div onClick={() => navigate(`/post/${post?._id}`)} className={`cursor-pointer hover:bg-slate-50 border-b border-slate-200 px-5 pt-3 pb-[1.5px] flex gap-2`}>
             <div className='w-12 flex justify-center'>
                 <img className='h-10 w-10 rounded-full object-cover' src={user?.avatar} alt="" />
             </div>
@@ -235,24 +236,12 @@ function PostCard({post, repliedTo}){
                         e.stopPropagation()
                         navigate(`/user/${user?.username}`)
 
-                        }} className='flex'>
-                        <div className='relative self-start group'>
-                            <p className="text-sm font-semibold hover:underline">{user?.fullname?.toUpperCase()}</p>
-                            <div className="z-10 absolute rounded-xl top-5 bg-white left-0 border-[1px] p-4 opacity-0 invisible group-hover:visible group-hover:opacity-100 group-hover:delay-500">
-                                <img className="rounded-full h-10 w-10 object-cover" src={user?.avatar} alt="" />
-                                <p className="text-sm text-nowrap font-semibold mt-1">{user?.fullname?.toUpperCase()}</p>
-                                <p className='text-gray-600 text-sm self-start'>@{user?.username?.toLowerCase()}</p>
-                                <p className='text-sm self-start mt-2'>{user?.about}</p>
-                                <div className="flex gap-5 mt-2">
-                                    <p className="text-nowrap text-sm text-gray-600 hover:underline"><span className="font-semibold text-black">4</span> Followers</p>
-                                    <p className="text-nowrap text-sm text-gray-600 hover:underline"><span className="font-semibold text-black">12</span> Followings</p>
-                                </div>
-                            </div>
-                        </div>
-                        <p className='self-start text-gray-600 mx-1'>·</p>
-                        <p className='text-gray-600 text-sm self-start'>@{user?.username}</p>
-                        <p className='self-start text-gray-600 mx-1'>·</p>
-                        <p className='text-gray-600 text-sm'>8m</p>
+                        }} className='flex items-center'>
+                        <p className="text-[15px] font-semibold hover:underline">{user?.fullname?.toUpperCase()}</p>
+                        <div className='h-1 w-1 bg-gray-600 rounded-xl mx-1'></div>
+                        <p className='text-gray-600'>@{user?.username}</p>
+                        <div className='h-1 w-1 bg-gray-600 rounded-full mx-1'></div>
+                        <p className='text-gray-600'>8m</p>
                     </div>
                     <div className="relative flex flex-col items-end">
                         <button onClick={(e) => handleDropDown(e)} className=''>⋯</button>
@@ -264,9 +253,9 @@ function PostCard({post, repliedTo}){
                     </div>
                 </div>
 
-                <div className="mb-2">
+                <div className="">
                     {repliedTo && <p className="text-sm mb-1 font-semibold text-gray-500 ">Replying to <span className="text-blue-500">@{repliedTo}</span></p>}
-                    <p className='tracking-normal leading-tight text-[15px]'>{post?.text}</p>
+                    <p className='text-gray-800'>{post?.text}</p>
 
                     {mediaLength > 0 &&
                         <div className={`grid ${mediaGallery()} mt-2`}>
@@ -283,11 +272,35 @@ function PostCard({post, repliedTo}){
                     }
                 </div>
 
-                <div className='mt-2 flex justify-between mt-2'>
-                    <button onClick={(e) => handelPostReply(e)} className='flex items-center'><img className='h-5 w-5' src="../../../comment.png" alt="" />{postReplyCount}</button>
-                    <button onClick={(e) => handleRepost(e)} className='flex items-center'><img className={`mr-1 h-4 w-4 ${postReposted ? 'bg-green-200' : ''}`} src="../../../repost.png" alt="" />{postRepostCount}</button>
-                    <button onClick={(e) => handlePostLike(e)} className='flex items-center'><img className={`mr-1 h-4 w-4 ${postLiked && 'bg-red-200'}`} src="../../../heart.png" alt="" />{postLikeCount}</button>
-                    <button onClick={(e) => handleBookmark(e)} className='flex items-center'><img className={`mr-1 h-4 w-4 ${postBookmarked ? 'bg-blue-200' : ''}`} src="../../../bookmark.png" alt="" /></button>
+                <div className='flex justify-between ml-[-8px]'>
+                    <button onClick={(e) => handelPostReply(e)} className='min-w-12 group cursor-pointer flex items-end text-sm text-gray-500'>
+                        <div className="p-2 group-hover:bg-blue-100/60 rounded-full ">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 fill-gray-500 group-hover:fill-blue-500`}>
+                                <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0-.21,1.09A1,1,0,0,0,3,22h9A10,10,0,0,0,12,2Zm0,18H5.41l.93-.93a1,1,0,0,0,0-1.41A8,8,0,1,1,12,20Z"/>
+                            </svg>
+                        </div>
+                        <p className="pb-1.5 font-medium group-hover:text-blue-500 ml-[-5px] brder">{postReplyCount}</p>
+                    </button>
+
+                    <button onClick={(e) => handleRepost(e)} className='min-w-12 group cursor-pointer flex items-end text-sm text-gray-500'>
+                        <div className="p-2 group-hover:bg-green-100/60 transition-colors duration-200 rounded-full">
+                            <Repeat2 strokeWidth={2} className={`h-5 w-5 stroke-gray-500 group-hover:stroke-green-500 ${postReposted ? 'stroke-green-500': ''}`}/>
+                        </div>
+                        <p className={`pb-1.5 font-medium group-hover:text-green-500 ml-[-5px] ${postReposted ? 'text-green-500': ''}`}>{postRepostCount}</p>
+                    </button>
+
+                    <button onClick={(e) => handlePostLike(e)} className='min-w-12 group cursor-pointer flex items-end text-sm text-gray-500'>
+                    <div className="p-2 group-hover:bg-red-100/60 transition-colors duration-200 rounded-full">
+                        <Heart strokeWidth={2} className={`h-4.5 w-4.5 stroke-gray-500 group-hover:stroke-red-400 ${postLiked ? 'fill-red-400 stroke-red-400' : ''}`}/>
+                    </div>
+                    <p className={`pb-1.5 font-medium group-hover:text-red-400 ml-[-5px] ${postLiked ? 'text-red-400' : ''}`}>{postLikeCount}</p>
+                    </button>
+
+                    <button onClick={(e) => handleBookmark(e)} className='min-w-12 group cursor-pointer flex justify-end items-end'>
+                        <div className="p-2 group-hover:bg-blue-100/60 rounded-full">
+                            <Bookmark strokeWidth={2} className={`h-4.5 w-4.5  group-hover:stroke-blue-500 ${postBookmarked ? 'fill-blue-500 stroke-blue-500' : 'stroke-gray-500'}`}/>
+                        </div>
+                    </button>
                 </div>
             </div>
 

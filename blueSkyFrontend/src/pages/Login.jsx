@@ -7,9 +7,8 @@ import 'ldrs/dotPulse'
 import axios from "axios"
 
 function Login(){
-    const {user, setUser, login} = useUser()
+    const {setUser, loading, setLoading} = useUser()
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         username: '',
         password: ''
@@ -88,11 +87,14 @@ function Login(){
             const { data } = await axios.post(`http://localhost:8003/user/login`, formData, {withCredentials: true})
             console.log(data.data)
             setUser(data.data)
-            toast.success(`"${data.data.fullname}" logged in`, {
-                autoClose: 2000,
-            })
 
-            setTimeout(() => navigate('/'), 1000)
+            setTimeout(() => {
+                toast.success(`"${data.data.fullname}" logged in successfully`, {
+                    autoClose: 2500,
+                })
+                navigate('/')
+
+            }, 500)
 
         } catch (error) {
             console.log(error)
@@ -102,7 +104,7 @@ function Login(){
             setTimeout(() => {
                 setLoading(false)
 
-            }, 500)
+            }, 600)
         }
     }
 
@@ -165,14 +167,14 @@ function Login(){
 
             </form>
 
-            {loading && <div className='bg-white/60 fixed border-1 right-0 left-0 top-0 bottom-0 flex justify-center items-center'>
+            {/* {loading && <div className='bg-white/60 fixed right-0 left-0 top-0 bottom-0 flex justify-center items-center'>
                 <l-mirage
                     size="80"
                     speed="1.5"
                     color="blue"
                 ></l-mirage>
-            </div>}
-            <ToastContainer/>
+            </div>} */}
+            {/* <ToastContainer/> */}
         </div>
     )
 

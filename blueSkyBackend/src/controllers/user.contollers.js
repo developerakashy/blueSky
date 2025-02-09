@@ -332,10 +332,9 @@ const logout = asyncHandler(async (req, res) => {
 const sendUserVerificationEmail = asyncHandler(async (req, res) => {
 
     try {
-        const mailSent = await sendEmail(req?.user?.email, 'VERIFY', req?.user?._id)
+        const codeExpiration = await sendEmail(req?.user?.email, 'VERIFY', req?.user?._id)
 
-
-        return res.status(200).json(new ApiResponse(200, mailSent, 'mail sent successfully'))
+        return res.status(200).json(new ApiResponse(200, {codeExpiration}, 'mail sent successfully'))
 
     } catch (error) {
         throw new ApiError(400, error?.message || 'something went wrong while sending verification mail')
@@ -343,20 +342,22 @@ const sendUserVerificationEmail = asyncHandler(async (req, res) => {
 })
 
 const verifyUserVerificationToken = asyncHandler(async (req, res) => {
-    const { token } = req.body
+    const { verificationCode } = req.body
 
     try {
-        const user = await User.findOne({verificationToken: token})
+        const user = await User.findOne({
+            _id: req?.user?._id,
+            verificationCode: parseInt(verificationCode)
+        })
 
-        if(!user) throw new ApiError(400, 'invalid token')
+        if(!user) throw new ApiError(400, 'Incorrect code')
 
-        if(user?.verificationTokenExpiry < Date.now()) throw new ApiError(400, 'verification link expired')
+        if(user?.verificationCodeExpiry < Date.now()) throw new ApiError(400, 'Verification code expired')
 
-        if(user?._id?.toString() !== req?.user?._id?.toString()) throw new ApiError(400, 'user unauthorized to use this link')
 
         user.isVerified = true
-        user.verificationToken = null
-        user.verificationTokenExpiry = null
+        user.verificationCode = null
+        user.verificationCodeExpiry = null
 
         await user.save()
 
