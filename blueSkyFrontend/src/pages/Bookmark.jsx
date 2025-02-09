@@ -25,7 +25,7 @@ function Bookmark(){
 
 
     return(
-        <div className="w-[600px] border-x-[1px]">
+        <div className="w-full pb-186">
             <div className="p-4 border-b-[1px]">
                 <p className="text-xl font-bold">Bookmarks</p>
             </div>

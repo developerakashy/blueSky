@@ -5,8 +5,8 @@ import { upload } from "../middlewares/multer.middlewares.js";
 
 const router = Router()
 
+router.route('/all').get(verifyJwtToken, getAllPosts)
 router.route('/:postId').get(verifyJwtToken, getPostById)
-router.route('/').get(verifyJwtToken, getAllPosts)
 router.route('/:username/posts').get(verifyJwtToken, getUserPosts)
 
 //secured route

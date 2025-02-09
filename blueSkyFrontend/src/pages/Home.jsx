@@ -1,48 +1,90 @@
-import React, { Children, memo, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PostCard from '../components/PostCard'
 import axios from 'axios'
-import { ScrollRestoration } from 'react-router'
-import CreatePost from '../components/CreatePost'
 import { useUser } from '../context/userContext'
 import { usePostContext } from '../context/postContext'
-import DirectMessage from './SocketConnection'
+import { throttle } from 'lodash'
+import { ring2 } from 'ldrs'
+
+ring2.register()
 
 function Home(){
-    const {publishPost, setPublishPost} = useUser()
+    const { posts, setPosts, hasMorePosts, setHasMorePosts} = usePostContext()
     const [page, setPage] = useState(1)
-    const { posts, setPosts} = usePostContext()
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
+
+
+    const fetchPosts = async (currentPage) => {
+        if(loading) return
+
+        console.log('request accepted')
+        setLoading(true)
+        try {
+            const { data } = await axios.get(`http://localhost:8003/post/all?page=${currentPage}`, {withCredentials: true})
+            console.log(data)
+
+            if(data.data.length > 0){
+                setPosts(prev => [...prev, ...data.data])
+                setPage(prev => prev + 1)
+
+            }else {
+                setHasMorePosts(false)
+            }
+
+
+
+        } catch (error) {
+            console.log(error)
+
+        } finally {
+            setLoading(false)
+
+        }
+    }
+
 
 
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const { data } = await axios.get('http://localhost:8003/post/', {withCredentials: true})
-                console.log(data.data)
-                setLoading(false)
-                setPosts(data.data)
-            } catch (error) {
-                console.log(error.response.data.message)
+        const handleScroll = throttle(() => {
+            if((document.documentElement.scrollTop + window.innerHeight) > (document.documentElement.offsetHeight - 50)){
+
+                if(hasMorePosts){
+                    console.log('send request')
+                    fetchPosts(page)
+                }
             }
+
+        }, 500)
+
+        if(posts.length === 0){
+            fetchPosts(page)
         }
 
-        if(!posts.length){
-            fetchPosts()
-        }else{
-            setLoading(false)
-        }
+        window.addEventListener('scroll', handleScroll)
 
-    }, [page])
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+        }
+    }, [page, hasMorePosts])
 
 
     return(
-        <div className='w-[600px] border-x-1 border-slate-200'>
+        <div className='w-full'>
 
-            {loading && <p className='h-screen'>Loading...</p>}
             {posts.length > 0 && posts.map(post => post?._id &&
                 <PostCard key={post._id} post={post}/>
             )}
+            {hasMorePosts && <div className='p-4 flex justify-center'>
+                <l-ring-2
+                  size="32"
+                  stroke="4"
+                  stroke-length="0.25"
+                  bg-opacity="0.1"
+                  speed="0.8"
+                  color="blue"
+                ></l-ring-2>
+            </div>}
         </div>
 
     )

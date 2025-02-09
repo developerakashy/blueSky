@@ -11,7 +11,7 @@ function Notification({notifications}){
     }, [notifications])
 
     return(
-        <div className="w-[600px] border-x-[1px]">
+        <div className="w-full pb-186">
             <div className="border-b-[1px] p-4">
                 <p className="font-bold text-xl">Notifications</p>
             </div>

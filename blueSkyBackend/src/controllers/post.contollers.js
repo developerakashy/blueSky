@@ -275,6 +275,8 @@ const getPostById = asyncHandler(async (req, res) => {
 })
 
 const getAllPosts = asyncHandler(async (req, res) => {
+    const { page } = req.query
+    console.log(page)
 
     const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
 
@@ -385,6 +387,15 @@ const getAllPosts = asyncHandler(async (req, res) => {
                 $addFields: {
                     userBookmarked: {$gt: [{$size: { $ifNull: ['$bookmarkInfo', []] } }, 0]}
                 }
+            },
+            {
+                $sort : { createdAt: -1}
+            },
+            {
+                $skip: (page - 1) * 10
+            },
+            {
+                $limit: 10
             },
             {
                 $project: {

@@ -62,7 +62,7 @@ function ChatMessages(){
 
 
     return(
-        <div className="w-[600px] border-x-[1px] relative max-h-screen">
+        <div className="relative h-screen max-h-screen">
 
             <div className="flex gap-2 border-b-[1px] px-4 py-2 w-full bg-white max-h-[10%]">
                 <div className="min-w-12">
@@ -76,7 +76,7 @@ function ChatMessages(){
             </div>
 
 
-            <div  className="w-full flex flex-col gap-2 px-2 pb-18 max-h-[85.5%] overflow-y-auto">
+            <div  className="w-full flex flex-col gap-2 px-2 pb-18 border-blue-400 max-h-[85.5%] overflow-y-auto">
                 {messages && messages.map((message, index) =>
                     <div ref={messagesEndRef} key={message?._id} className={`mt-2 max-w-[50%] flex-col ${message?.senderUserId?._id === user?._id ? 'flex items-end self-end' : ''}`}>
                             <p className={`w-fit px-4 py-3 leading-5 rounded-t-3xl ${ message?.senderUserId?._id === user?._id ? 'rounded-l-3xl bg-blue-200': 'rounded-r-3xl bg-gray-100'}`}>{message.message}</p>

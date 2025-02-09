@@ -15,7 +15,7 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
 
         if(postPublished?._id){
             console.log(setPosts)
-            setPosts && setPosts(prev => [...prev, postPublished])
+            setPosts && setPosts(prev => [postPublished,...prev])
 
             setPublishPost({publish: false, postPublishId: postPublished._id, postPublishParentId: postPublished.parentPost})
         }
@@ -65,7 +65,27 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
 
     return(
         <div className="z-40 w-screen h-screen left-0 bottom-0 fixed top-0 bg-black/20 flex justify-center border-2">
-            {!user?.isVerified &&
+            {!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            user?.isVerified &&
                 <Verification setPublishPost={setPublishPost}/>
             }
 

@@ -105,7 +105,7 @@ function Profile(){
 
 
     return(
-        <div className="w-[600px] border-x-[1px]">
+        <div className="w-full">
             {edit && <EditProfile setEdit={setEdit} user={user} setUser={setUser}/>}
             <div className='fixed z-10 top-0 flex justify-center items-center'>
                 <button onClick={() => navigate(-1)} className='p-2 backdrop-blur-md bg-black/10 rounded-full ml-2 mt-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
@@ -147,7 +147,7 @@ function Profile(){
                 <button onClick={() => setActiveSection('userLiked')} className={`w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'userLiked' ? 'text-black' : 'text-gray-500'}`}>Likes</button>
             </div>
 
-            <div>
+            <div className="pb-128">
                 {loading && <p className="h-screen mb-12">'Loading...'</p>}
                 {renderPost()}
             </div>

@@ -27,7 +27,7 @@ function PostView(){
     }, [postId])
 
     return(
-        <div className="w-[600px] border-x-[1px]">
+        <div className="w-full">
             {post && <Post post={post} postReplies={postReplies} parentPost={parentPost}/>}
         </div>
     )

@@ -22,6 +22,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState(null)
   const [posts, setPosts] = useState([])
+  const [hasMorePosts, setHasMorePosts] = useState(true)
   const [publishPost, setPublishPost] = useState(false)
   const [notifications, setNotifications] = useState([])
   const [chats, setChats] = useState([])
@@ -75,7 +76,7 @@ function App() {
 
   return (
     <UserContextProvider value={{user, chats, setChats, messages, setMessages, notifications, setNotifications, publishPost, setPublishPost, setUser, logout, loading, setLoading}}>
-      <PostContextProvider value={{posts, setPosts}}>
+      <PostContextProvider value={{posts, setPosts, hasMorePosts, setHasMorePosts}}>
 
       <BrowserRouter>
       {loading && <div className='z-50 fixed bg-blue-50/50  right-0 left-0 top-0 bottom-0 flex flex-col gap-2 justify-center items-center'>
@@ -106,10 +107,10 @@ function App() {
             <Route path='chat/messages/:chatId' element={<ChatMessages/>}/>
             <Route path='bookmarks' element={<Bookmark/>}/>
 
+          <Route path='*' element={<p className='h-screen text-center pt-12 font-semibold text-red-500'>Page not found</p>}/>
           </Route>
           <Route path='/verify-token' element={<VerifyUser/>}/>
 
-          <Route path='*' element={<p>Page not found</p>}/>
         </Routes>
       {/* </ScrollProvider> */}
       </BrowserRouter>

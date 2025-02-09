@@ -13,15 +13,17 @@ function Layout(){
         <div className='flex justify-center'>
             <SocketConnection setNotifications={setNotifications}/>
             {publishPost?.publish && <CreatePost setPosts={publishPost?.setPosts} parentPost={publishPost.parentPost} setPublishPost={setPublishPost}/>}
-            <div className='sticky top-0 border-l-[1px] h-screen w-[270px]'>
+            <div className='hidden md:flex sticky top-0 h-screen w-full justify-end max-w-[450px]'>
                 <Nav/>
             </div>
-            <Outlet/>
-            <div className='sticky top-0 border-r-[1px] w-[380px] h-screen'>
+            <div className='sm:min-w-[650px] max-w-[650px] border-x-1 border-slate-200'>
+                <Outlet/>
+            </div>
+            <div className='hidden lg:block sticky top-0 border-r-[1px] w-full max-w-[450px] h-screen'>
                 Bottom
             </div>
 
-            
+
         </div>
     )
 }

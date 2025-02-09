@@ -48,7 +48,7 @@ function Chats(){
 
     return(
         <>
-        <div className="w-[600px] border-x-[1px]">
+        <div className="w-full pb-186">
             <div className="flex justify-between p-4 border-b-[1px]">
                 <p className="text-xl font-bold">Chats</p>
                 <button onClick={handleNewChatBtn} className="block flex items-center bg-blue-200 px-2 py-1 rounded-xl gap-2"><img className="w-3 h-3" src="../../plus.png" alt="" />New chat</button>

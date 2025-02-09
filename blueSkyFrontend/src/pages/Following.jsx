@@ -56,7 +56,7 @@ function FollowingsAndFollowers(){
     }, [user])
 
     return (
-        <div className="w-[600px] border-x-[1px]">
+        <div className="w-full">
             <div className='sticky z-10 top-0 bg-white'>
                 <div className="flex items-center p-2">
                     <button onClick={() => navigate(-1)} className='px-4 rounded-full mr-6'><img className='h-4' src="../../.././back.png" alt="" /></button>
