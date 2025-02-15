@@ -108,7 +108,7 @@ function Profile(){
         <div className="w-full">
             {edit && <EditProfile setEdit={setEdit} user={user} setUser={setUser}/>}
             <div className='fixed z-10 top-0 flex justify-center items-center'>
-                <button onClick={() => navigate(-1)} className='p-2 backdrop-blur-md bg-black/10 rounded-full ml-2 mt-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
+                <button onClick={() => navigate(-1)} className='cursor-pointer p-2 backdrop-blur-md bg-black/10 rounded-full ml-2 mt-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
                 {/* <div>
                     <p className='font-semibold'>{user?.fullname?.toUpperCase()}</p>
                     <p className="text-sm text-gray-500">{data.posts?.length} Posts | {data.replies?.length} Replies | {data.userLiked?.length} Posts Liked</p>
@@ -122,8 +122,8 @@ function Profile(){
                 </div>
 
                 <div className="text-end px-4 py-3">
-                    { userLoggedIn?.username === username ? <button onClick={() => setEdit(true)} className="rounded-full px-4 py-2 bg-stone-200 mr-2">Edit profile</button> :
-                    <button onClick={handleFollow} className={`rounded-full px-4 py-2 border-[1px] font-bold border-gray-200 ${followed ? ' text-black hover:bg-red-200 hover:text-red-600 hover:border-red-300' : 'bg-black text-white'}`}>{followed ? 'unfollow' : 'follow'}</button> }
+                    { userLoggedIn?.username === username ? <button onClick={() => setEdit(true)} className="cursor-pointer rounded-full px-4 py-2 bg-stone-200 mr-2">Edit profile</button> :
+                    <button onClick={handleFollow} className={`cursor-pointer rounded-full px-4 py-2 border-[1px] font-bold border-gray-200 ${followed ? ' text-black hover:bg-red-200 hover:text-red-600 hover:border-red-300' : 'bg-black text-white'}`}>{followed ? 'unfollow' : 'follow'}</button> }
                 </div>
 
                 <div className="px-4">

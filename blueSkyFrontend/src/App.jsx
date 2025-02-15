@@ -17,6 +17,7 @@ import ChatMessages from './pages/ChatMessages'
 import VerifyUser from './pages/VerifyUser'
 import Bookmark from './pages/Bookmark'
 import { ToastContainer } from 'react-toastify'
+import PostInput from './components/PostInput'
 
 function App() {
   const [loading, setLoading] = useState(false)
@@ -106,8 +107,8 @@ function App() {
             <Route path='chat' element={<Chats/>}/>
             <Route path='chat/messages/:chatId' element={<ChatMessages/>}/>
             <Route path='bookmarks' element={<Bookmark/>}/>
-
-          <Route path='*' element={<p className='h-screen text-center pt-12 font-semibold text-red-500'>Page not found</p>}/>
+            <Route path='explore' element={<PostInput/>}/>
+            <Route path='*' element={<p className='h-screen text-center pt-12 font-semibold text-red-500'>Page not found</p>}/>
           </Route>
           <Route path='/verify-token' element={<VerifyUser/>}/>
 

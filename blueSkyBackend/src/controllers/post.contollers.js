@@ -20,8 +20,15 @@ const publishPost = asyncHandler(async (req, res) => {
     const publicIds = []
     const mediaFileUrls =  []
     const publish = {}
+    let mentions = []
 
-    if(text?.trim()) publish.text = text
+    if(text?.trim()){
+        publish.text = text
+
+        const postMentions = text.match(/@([\w.-]+)/g)
+
+        mentions = postMentions ? postMentions.map(username => username.slice(1)) : []
+    }
 
     try {
         if(req?.baseUrl === '/reply'){
@@ -32,10 +39,13 @@ const publishPost = asyncHandler(async (req, res) => {
             publish.parentPost = parentPostId
         }
 
-        if(
-            mediaFiles.some(file => file.mimetype.split('/')[0] !== 'image' && file.mimetype.split('/')[0] !== 'video/mp4')
-        ){
-            throw new ApiError(400, 'Only images and videos allowed')
+        if (
+            mediaFiles.some(file => {
+                const [type, subtype] = file.mimetype.split('/');
+                return type !== 'image' && !(type === 'video' && subtype === 'mp4');
+            })
+        ) {
+            throw new ApiError(400, 'Only images and MP4 videos are allowed');
         }
 
         for(const file of mediaFiles){
@@ -51,6 +61,7 @@ const publishPost = asyncHandler(async (req, res) => {
 
         if(mediaFileUrls.length > 0) publish.mediaFiles = mediaFileUrls
 
+
         try {
             const post = await Post.create({
                 userId: req.user._id,
@@ -64,6 +75,39 @@ const publishPost = asyncHandler(async (req, res) => {
                 postId: post._id
             })
 
+
+            if(mentions.length > 0){
+                const usersMentioned = await User.find(
+                    {username: {$in: mentions}},
+                    {_id: 1}
+                ).then(users => users.map(user => user?._id))
+
+                usersMentioned.map(async (userId) => {
+                    if(req?.user?._id?.toString() !== userId?.toString()){
+                        const notificationCreated = await Notification.create({
+                            senderUserId: req?.user?._id,
+                            receiverUserId: userId,
+                            type: NotificationType.MENTION,
+                            message: `@${req?.user?.username} mentioned you in a post`,
+                            relatedPostId: postCreated?._id
+
+                        })
+
+                        if(!notificationCreated) throw new ApiError(400, 'error creating notification')
+
+                        io.to(userId?.toString()).emit('newNotification', {
+                            senderUserId: req?.user,
+                            receiverUserId: userId,
+                            type: NotificationType.MENTION,
+                            message: `@${req?.user?.username} mentioned you in a post`,
+                            relatedPostId: postCreated
+
+                        })
+                    }
+                })
+
+
+            }
 
             if(parentPostInfo){
                 const receiverUser = await User.findById(parentPostInfo?.userId)

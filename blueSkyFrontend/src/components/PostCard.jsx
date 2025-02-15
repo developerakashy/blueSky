@@ -4,6 +4,7 @@ import { useUser } from "../context/userContext";
 import { useNavigate } from "react-router";
 import { usePostContext } from "../context/postContext";
 import { Bookmark, Heart, MessageCircleMore, MessageSquareText, MessageSquareTextIcon, Repeat2 } from "lucide-react";
+import PostText from "./PostText";
 
 
 
@@ -35,6 +36,8 @@ function PostCard({post, repliedTo}){
     const user = post?.userId
     const imageUrl = post?.mediaFiles
     const mediaLength = imageUrl?.length
+
+
 
     const handleDropDown = (e) => {
         e.stopPropagation()
@@ -255,7 +258,7 @@ function PostCard({post, repliedTo}){
 
                 <div className="">
                     {repliedTo && <p className="text-sm mb-1 font-semibold text-gray-500 ">Replying to <span className="text-blue-500">@{repliedTo}</span></p>}
-                    <p className='text-gray-800'>{post?.text}</p>
+                    <PostText text={post?.text}/>
 
                     {mediaLength > 0 &&
                         <div className={`grid ${mediaGallery()} mt-2`}>

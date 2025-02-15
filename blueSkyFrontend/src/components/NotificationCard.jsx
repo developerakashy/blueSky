@@ -28,8 +28,8 @@ function NotificationCard({notification}){
             </div>
             }
 
-            {
-
+            {notification.type === 'mention' &&
+                <PostCard post={notification?.relatedPostId}/>
             }
 
 

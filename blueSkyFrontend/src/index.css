@@ -5,3 +5,12 @@
     --font-inter: 'inter', 'sans-serif'
 }
 
+div[contenteditable="true"]::before {
+    content: attr(placeholder);
+    color: #aaa;
+}
+
+div[contenteditable="true"]:focus::before,
+div[contenteditable="true"]:not(:empty)::before {
+  content: "";
+}

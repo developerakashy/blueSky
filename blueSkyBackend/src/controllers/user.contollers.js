@@ -7,7 +7,7 @@ import { destroyOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js"
 import fs from 'fs'
 import { Post } from "../models/post.models.js"
 import mongoose from "mongoose"
-import { Notification } from "../models/notification.models.js"
+import { Notification, NotificationType } from "../models/notification.models.js"
 import { postDetail } from "./post.contollers.js"
 import { sendEmail } from "../utils/mail.js"
 import { Bookmark } from "../models/bookmark.models.js"
@@ -380,13 +380,22 @@ const notifications = asyncHandler(async (req, res) => {
             notifications.map(async (notification) => {
 
                 const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
-                if(notification.type === 'reply'){
+                if(notification.type === NotificationType.REPLY){
                     const postReplyId = await postDetail(notification?.postReplyId, currentUser)
 
                     return {
                         ...notification._doc,
                         postReplyId
                     }
+
+                } else if(notification.type === NotificationType.MENTION){
+                    const relatedPostId = await postDetail(notification?.relatedPostId, currentUser)
+
+                    return {
+                        ...notification?._doc,
+                        relatedPostId
+                    }
+
                 } else {
                     const senderUserId = await User.findById(notification.senderUserId).select('-password -refreshToken')
                     const relatedPostId = await Post.findById(notification.relatedPostId)
@@ -409,9 +418,28 @@ const notifications = asyncHandler(async (req, res) => {
 })
 
 const getUsers = asyncHandler(async (req, res) => {
+    const { search: searchQuery } = req.query
 
+    console.log(searchQuery)
     try {
-        const users = await User.find({_id:{$ne: null}}).select("-password -refreshToken")
+        const users = await User.aggregate([
+            {
+                $match: {
+                    username: { $regex: searchQuery, $options: "i" }
+                }
+            },
+            {
+                $project: { fullname: 1, username: 1, avatar: 1 }
+            },
+            {
+                $sort: { username: 1 }
+            },
+            {
+                $limit: 10
+            }
+        ]);
+
+        // const users = await User.find({_id:{$ne: null}}).select("-password -refreshToken")
 
         return res.status(200).json(new ApiResponse(200, users, 'users fetched successfully'))
 

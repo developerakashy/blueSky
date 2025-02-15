@@ -4,7 +4,7 @@ export const NotificationType = {
     LIKE: 'like', //done
     UNLIKE: 'unlike', //done
     REPLY: 'reply', //done
-    POST: 'post',
+    MENTION: 'mention',
     FOLLOW: 'follow', //done
     UNFOLLOW: 'unfollow', //done
     REPOST: 'repost',

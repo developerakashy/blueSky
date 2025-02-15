@@ -143,7 +143,7 @@ function Login(){
                                 name='password'
                                 className="outline-slate-300 outline-1 focus:outline-1 focus:outline-blue-400 w-full px-3 py-2  rounded-lg"
                                 type={showPassword ? `text` : `password`}
-                                placeholder="Create Password"
+                                placeholder="Enter Password"
                                 value={formData.password}
                                 onChange={(e) => handleInputChange(e)}
                             />
@@ -167,14 +167,6 @@ function Login(){
 
             </form>
 
-            {/* {loading && <div className='bg-white/60 fixed right-0 left-0 top-0 bottom-0 flex justify-center items-center'>
-                <l-mirage
-                    size="80"
-                    speed="1.5"
-                    color="blue"
-                ></l-mirage>
-            </div>} */}
-            {/* <ToastContainer/> */}
         </div>
     )
 

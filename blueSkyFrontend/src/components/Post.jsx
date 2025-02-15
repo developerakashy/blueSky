@@ -4,6 +4,7 @@ import PostCard from './PostCard'
 import { useNavigate } from 'react-router'
 import CreatePost from './CreatePost'
 import axios from 'axios'
+import PostText from './PostText'
 
 function Post({post, postReplies, parentPost}){
     const {publishPost, setPublishPost} = useUser()
@@ -232,7 +233,9 @@ function Post({post, postReplies, parentPost}){
                 </div>
 
                 <div className='w-full'>
-                <p className='px-4'>{post?.text}</p>
+                <div className="px-4">
+                    <PostText  text={post?.text}/>
+                </div>
                 {mediaLength > 0 &&
                     <div className={`cursor-pointer grid ${mediaGallery()} mt-2`}>
                         {imageUrl && imageUrl.map((url, index) =>
