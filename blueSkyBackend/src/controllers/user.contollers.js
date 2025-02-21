@@ -11,6 +11,7 @@ import { Notification, NotificationType } from "../models/notification.models.js
 import { postDetail } from "./post.contollers.js"
 import { sendEmail } from "../utils/mail.js"
 import { Bookmark } from "../models/bookmark.models.js"
+import { Follow } from "../models/follow.models.js"
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -57,6 +58,10 @@ const register = asyncHandler(async (req, res) => {
         if(!user) throw new ApiError(400, 'something went wrong while registring user')
 
         await Bookmark.create({
+            userId: user?._id
+        })
+
+        await Follow.create({
             userId: user?._id
         })
 

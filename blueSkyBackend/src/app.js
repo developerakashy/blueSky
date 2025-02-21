@@ -1,4 +1,3 @@
-import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import express from 'express'
 import cors from 'cors'
@@ -40,10 +39,6 @@ io.on('connection', (socket) => {
         console.log('disconnected')
     })
 })
-
-
-
-
 
 
 //common middlewares

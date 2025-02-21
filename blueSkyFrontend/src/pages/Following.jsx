@@ -66,9 +66,9 @@ function FollowingsAndFollowers(){
                     </div>
                 </div>
 
-                <div className="border-b-[1px] flex">
-                    <button onClick={() => navigate(`/user/${username}/followers`)} className={`w-full p-3 hover:bg-gray-100 font-semibold ${path === 'followers' ? 'text-black' : 'text-gray-500'}`}>Followers</button>
-                    <button onClick={() => navigate(`/user/${username}/followings`)} className={`w-full p-3 hover:bg-gray-100 font-semibold ${path === 'followings' ? 'text-black' : 'text-gray-500'}`}>Followings</button>
+                <div className="border-b border-slate-200 flex">
+                    <button onClick={() => navigate(`/user/${username}/followers`)} className={`cursor-pointer w-full p-3 hover:bg-gray-100 font-semibold ${path === 'followers' ? 'text-black' : 'text-gray-500'}`}>Followers</button>
+                    <button onClick={() => navigate(`/user/${username}/followings`)} className={`cursor-pointer w-full p-3 hover:bg-gray-100 font-semibold ${path === 'followings' ? 'text-black' : 'text-gray-500'}`}>Followings</button>
                 </div>
             </div>
 

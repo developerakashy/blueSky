@@ -160,6 +160,11 @@ const getUserBookmark = asyncHandler(async (req, res) => {
                 }
             },
             {
+                $sort: {
+                    createdAt: -1
+                }
+            },
+            {
                 $project: {
                     text: 1,
                     mediaFiles: 1,

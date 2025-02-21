@@ -13,9 +13,17 @@ const toggleFollow = asyncHandler(async (req, res) => {
     try {
         if(req.user._id.toString() === userId) throw new ApiError(400, 'You cannot follow yourself')
 
-        const follow = await Follow.findOne({userId})
+        const userInfo = await User.findById(userId)
 
-        if(!follow) throw ApiError(400, `user's Follow model cannot be found`)
+        if(!userInfo) throw new ApiError(400, 'user to be followed not found')
+
+        let follow = await Follow.findOne({userId})
+
+        if(!follow) {
+            follow = await Follow.create({
+                userId
+            })
+        }
 
         const receiverUser = await User.findById(userId)
 
@@ -120,6 +128,56 @@ const userFollowings = asyncHandler(async (req, res) => {
     }
 })
 
+const mostFollowedUsers = asyncHandler(async (req, res) => {
+    try {
+        const users = await Follow.aggregate([
+            {
+                $project: {
+                    userId: 1,
+                    followersCount: {
+                        $cond: {
+                            if: {$isArray: '$userIdArray'},
+                            then: {$size: '$userIdArray'},
+                            else: 0
+                        }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'userInfo'
+                }
+            },
+            {
+                $sort: {
+                    followersCount: -1
+                }
+            },
+            {
+                $limit: 6
+            },
+            {
+                $project: {
+                    _id: {$first: '$userInfo._id'},
+                    fullname: {$first: '$userInfo.fullname'},
+                    avatar: {$first: '$userInfo.avatar'},
+                    username: {$first: '$userInfo.username'},
+                    followersCount: 1
+
+                }
+            }
+        ])
+
+        return res.status(200).json(new ApiResponse(200, users, 'users found successfully'))
+    } catch (error) {
+
+        throw new ApiError(400, error?.message || 'something went wrong while getting users followers')
+    }
+})
+
 
 const followers = async (userId, currentUser) => {
     const result = await Follow.aggregate([
@@ -221,5 +279,6 @@ const followings = async (userId) => {
 export {
     toggleFollow,
     userFollowers,
-    userFollowings
+    userFollowings,
+    mostFollowedUsers
 }

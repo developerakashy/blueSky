@@ -4,9 +4,16 @@ import usePosts from "../hooks/usePosts";
 import { usePostContext } from "../context/postContext";
 import { useUser } from "../context/userContext";
 import { useNavigate } from "react-router";
+import { Heart, UserRound } from "lucide-react";
 
 function NotificationCard({notification}){
     const navigate = useNavigate()
+
+    const handleUserClick = (e, username) => {
+        e.stopPropagation()
+        navigate(`/user/${username}`)
+
+    }
 
     return(
         <div className="">
@@ -15,14 +22,20 @@ function NotificationCard({notification}){
             }
 
             {notification.type === 'like' &&
-                <div onClick={() => navigate(`/post/${notification?.relatedPostId?._id}`)} className="cursor-pointer border-b-[1px] flex gap-2 px-4 py-3 hover:bg-slate-50">
-                <div className=" min-w-12 flex justify-center">
-                    <img className="mt-1 h-7 w-7" src="../../heart.png" alt="" />
+            <div onClick={() => navigate(`/post/${notification?.relatedPostId?._id}`)} className="cursor-pointer border-b border-slate-200 flex gap-2 px-4 py-3 hover:bg-slate-50">
+                <div className="min-w-12 flex justify-center">
+                    <Heart className="h-7.5 w-7.5 fill-red-500 stroke-red-500"/>
                 </div>
 
                 <div>
-                    <img className="h-10 w-10 object-cover rounded-full" src={notification?.senderUserId?.avatar} alt="" />
-                    <p className="text-[15px] mt-2"><span className="font-bold">{notification?.senderUserId?.fullname?.toUpperCase()}</span> liked your post</p>
+                {!notification?.senderUserId?.avatar ?
+                    <div className='h-10 w-10 bg-slate-200 flex justify-center items-center rounded-full object-cover'>
+                        <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
+                    </div> :
+
+                    <img className='h-10 w-10 rounded-full object-cover' src={user?.avatar} alt="" />
+                }
+                    <p onClick={(e) => handleUserClick(e, notification?.senderUserId?.username)} className="text-[15px] mt-2"><span className="font-bold hover:underline">{notification?.senderUserId?.fullname?.toUpperCase()}</span> liked your post</p>
                     <p className="text-gray-600 text-[15px] mt-2">{notification?.relatedPostId?.text}</p>
                 </div>
             </div>

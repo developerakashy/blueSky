@@ -70,6 +70,7 @@ function App() {
       const { data } = await axios.post('http://localhost:8003/user/logout',{}, {withCredentials: true})
       console.log(data)
       setUser('')
+      
     } catch (error) {
       console.log(error)
     }

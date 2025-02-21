@@ -12,7 +12,7 @@ function Notification({notifications}){
 
     return(
         <div className="w-full pb-186">
-            <div className="border-b-[1px] p-4">
+            <div className="border-b border-slate-200 p-4">
                 <p className="font-bold text-xl">Notifications</p>
             </div>
             {notifications && notifications.map(notification => <NotificationCard key={notification?._id} notification={notification}/>)}

@@ -2,7 +2,7 @@ import React from 'react'
 import { useUser } from '../context/userContext'
 import { NavLink, useNavigate } from 'react-router'
 import { usePostContext } from '../context/postContext'
-import { Bell, Bookmark, CircleEllipsis, Ellipsis, Hash, House, MessageCircle, Rainbow, Search, UserRound } from 'lucide-react'
+import { Bell, Bookmark, CircleEllipsis, Cloudy, Ellipsis, Hash, House, MessageCircle, Rainbow, Search, UserRound } from 'lucide-react'
 
 function Nav(){
     const {user, setPublishPost, logout} = useUser()
@@ -13,7 +13,8 @@ function Nav(){
         <div className='h-full flex flex-col justify-between w-full max-w-[310px] mr-2'>
             <div className='mt-6'>
                 <button onClick={() => navigate('/')} className='cursor-pointer px-5 mb-4'>
-                    <Hash strokeWidth='1.5' className='h-8 w-8'/>
+                    {/* <Hash strokeWidth='1.5' className='h-8 w-8'/> */}
+                    <Cloudy strokeWidth='2' className='h-8 w-8 fill-blue-400 stroke-blue-500'/>
                 </button>
 
                 <button className='cursor-pointer group w-full px-2'>
@@ -56,7 +57,7 @@ function Nav(){
                         {({isActive}) =>
                             <div className='flex items-center gap-2 px-4 py-4 pr-12 w-min rounded-full group-hover:bg-slate-100'>
                                 <MessageCircle className={`${isActive ? 'stroke-3' : ''}`}/>
-                                <p className={`text-xl ${isActive ? 'font-bold' : ''}`}>Chat</p>
+                                <p className={`text-xl ${isActive ? 'font-bold' : ''}`}>Chats</p>
                             </div>
                         }
                     </NavLink>
@@ -81,7 +82,7 @@ function Nav(){
                         }
                     </NavLink>
                 </button>
-                <button className='cursor-pointer group w-full px-2'>
+                {/* <button className='cursor-pointer group w-full px-2'>
                     <NavLink to='/setting'>
                         {({isActive}) =>
                             <div className='flex items-center gap-2 px-4 py-4 pr-12 w-min rounded-full group-hover:bg-slate-100'>
@@ -90,7 +91,7 @@ function Nav(){
                             </div>
                         }
                     </NavLink>
-                </button>
+                </button> */}
                 <div className='px-2 py-2 '>
                     <button onClick={() => setPublishPost({publish: true, setPosts})} className='cursor-pointer w-full text-xl font-semibold text-white bg-blue-600 px-2 py-3 rounded-full'>Post</button>
                 </div>
@@ -100,8 +101,14 @@ function Nav(){
             {user?.username &&
             <div className='py-2 px-2 mx-2 rounded-full hover:bg-slate-100 mb-4 flex justify-between items-center'>
 
-                <div className='flex'>
-                    <img className='mr-2 block h-12 w-12 object-cover rounded-full' src={user?.avatar} alt="" />
+                <div className='flex items-center'>
+                    {!user?.avatar ?
+                        <div className='mr-2 h-12 w-12 bg-slate-200 flex justify-center items-center rounded-full object-cover'>
+                            <UserRound className='h-6 w-6 stroke-gray-600 rounded-full'/>
+                        </div> :
+
+                        <img className='mr-2 block h-12 w-12 rounded-full object-cover' src={user?.avatar} alt="" />
+                    }
                     <div>
                         <p className='font-bold text-sm'>{user?.fullname.toUpperCase()}</p>
                         <p className='text-sm'>@{user?.username}</p>

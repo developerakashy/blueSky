@@ -10,14 +10,14 @@ ring2.register()
 
 function Home(){
     const { posts, setPosts, hasMorePosts, setHasMorePosts} = usePostContext()
-    const [page, setPage] = useState(1)
+    const [page, setPage] = useState((posts?.length / 10) + 1) //good but needs urgent update
     const [loading, setLoading] = useState(false)
-
+    console.log((posts?.length / 10) + 1)
 
     const fetchPosts = async (currentPage) => {
         if(loading) return
 
-        console.log('request accepted')
+        console.log('request accepted for page ', currentPage)
         setLoading(true)
         try {
             const { data } = await axios.get(`http://localhost:8003/post/all?page=${currentPage}`, {withCredentials: true})

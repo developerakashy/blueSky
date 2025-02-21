@@ -1,4 +1,5 @@
 import axios from "axios"
+import { UserRound } from "lucide-react"
 import { useRef } from "react"
 import { useState } from "react"
 import { toast } from "react-toastify"
@@ -114,7 +115,13 @@ function PostInput({setContent, content}){
                     {suggestion.length > 0 && suggestion.map(user =>
                         <div key={user?._id} onClick={() => replaceWithSuggestion(user?.username)}  className="cursor-pointer flex gap-2 px-5 py-3 border-b border-slate-200 hover:bg-gray-100 min-w-64">
                             <div className="min-w-12 flex justify-center">
+                            {!user?.avatar ?
+                                <div className='h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
+                                    <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
+                                </div> :
+
                                 <img className='h-12 w-12 rounded-full object-cover' src={user?.avatar} alt="" />
+                            }
                             </div>
 
                             <div className="w-full">

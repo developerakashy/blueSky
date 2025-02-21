@@ -3,15 +3,16 @@ import React, { useEffect, useRef, useState } from "react";
 import { useUser } from "../context/userContext";
 import { useNavigate } from "react-router";
 import { usePostContext } from "../context/postContext";
-import { Bookmark, Heart, MessageCircleMore, MessageSquareText, MessageSquareTextIcon, Repeat2 } from "lucide-react";
+import { Bookmark, Heart, Repeat2, UserRound } from "lucide-react";
 import PostText from "./PostText";
-
+import formatTimeLine from "../utils/formatTimeLine";
+import { toast } from "react-toastify";
 
 
 function PostCard({post, repliedTo}){
     const navigate = useNavigate()
     const {setPosts} = usePostContext()
-    const {publishPost, setPublishPost} = useUser()
+    const {user: loggedInUser, publishPost, setPublishPost, setLoading} = useUser()
     const [previewImage, setPreviewImage] = useState(false)
     const [previewVideo, setPreviewVideo] = useState(false)
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -39,6 +40,7 @@ function PostCard({post, repliedTo}){
 
 
 
+
     const handleDropDown = (e) => {
         e.stopPropagation()
 
@@ -49,13 +51,25 @@ function PostCard({post, repliedTo}){
         e.stopPropagation()
 
         const deletePost = async () => {
+            setLoading(true)
+
             try {
                 const { data } = await axios.delete(`http://localhost:8003/post/${post?._id}`, {withCredentials: true})
 
                 console.log(data)
                 setPosts(prev => prev.filter(post => post?._id !== data?.data?._id))
+                setTimeout(() => {
+                    toast.success('Post deleted successfully')
+                }, 500);
+
             } catch (error) {
                 console.log(error)
+                toast.error(error?.response?.data?.message)
+
+            }finally {
+                setTimeout(() => {
+                    setLoading(false)
+                }, 500);
             }
         }
 
@@ -230,7 +244,13 @@ function PostCard({post, repliedTo}){
         <>
         <div onClick={() => navigate(`/post/${post?._id}`)} className={`cursor-pointer hover:bg-slate-50 border-b border-slate-200 px-5 pt-3 pb-[1.5px] flex gap-2`}>
             <div className='w-12 flex justify-center'>
-                <img className='h-10 w-10 rounded-full object-cover' src={user?.avatar} alt="" />
+                {!user?.avatar ?
+                    <div className='h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
+                        <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
+                    </div> :
+
+                    <img className='h-10 w-10 rounded-full object-cover' src={user?.avatar} alt="" />
+                }
             </div>
 
             <div className='w-full'>
@@ -244,20 +264,24 @@ function PostCard({post, repliedTo}){
                         <div className='h-1 w-1 bg-gray-600 rounded-xl mx-1'></div>
                         <p className='text-gray-600'>@{user?.username}</p>
                         <div className='h-1 w-1 bg-gray-600 rounded-full mx-1'></div>
-                        <p className='text-gray-600'>8m</p>
+                        <p className='text-gray-600 text-sm'>{formatTimeLine(post?.createdAt)}</p>
                     </div>
-                    <div className="relative flex flex-col items-end">
-                        <button onClick={(e) => handleDropDown(e)} className=''>⋯</button>
+                    {loggedInUser?.username === user?.username && <div className="relative flex flex-col items-end">
+                        <button onClick={(e) => handleDropDown(e)} className='cursor-pointer'>⋯</button>
                         {postMenu  &&
                         <div  className="absolute flex flex-col bg-white top-7 border-[1px] rounded-xl w-40 overflow-hidden">
-                            <button onClick={(e) => handlePostDelete(e)} className="text-nowrap w-full py-1 border-b-[1px] text-red-500 hover:bg-red-50">Delete</button>
+                            <button onClick={(e) => handlePostDelete(e)} className="cursor-pointer text-nowrap w-full py-1 border-b-[1px] text-red-500 hover:bg-red-50">Delete</button>
                         </div>
                         }
-                    </div>
+                    </div>}
                 </div>
 
                 <div className="">
-                    {repliedTo && <p className="text-sm mb-1 font-semibold text-gray-500 ">Replying to <span className="text-blue-500">@{repliedTo}</span></p>}
+                    {repliedTo && <p className="text-sm mb-1 font-semibold text-gray-500 ">Replying to <span onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/user/${repliedTo}`)
+
+                        }} className="text-blue-500">@{repliedTo}</span></p>}
                     <PostText text={post?.text}/>
 
                     {mediaLength > 0 &&

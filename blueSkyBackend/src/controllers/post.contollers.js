@@ -250,17 +250,12 @@ const deletePost = asyncHandler(async (req, res) => {
             throw new ApiError(400, 'user unauthorized')
         }
 
-        await recursivePostDelete(postId, session)
+        await recursivePostDelete(post, session)
 
         await session.commitTransaction()
         await session.endSession()
 
-        for(const url of post.mediaFiles){
-            const mediaUrl = url.split('/')
-            const publicId = mediaUrl[mediaUrl.length - 1].split('.')[0]
 
-            await destroyOnCloudinary(publicId)
-        }
 
         return res.status(200).json(new ApiResponse(200, post, 'Post deletion successfull'))
     } catch (error) {
@@ -272,26 +267,35 @@ const deletePost = asyncHandler(async (req, res) => {
 
 })
 
-const recursivePostDelete = async (postId, session) => {
+const recursivePostDelete = async (post, session) => {
     try {
-        await Post.deleteOne({_id: postId}, {session})
+        await Post.deleteOne({_id: post?._id}, {session})
 
-        await Repost.deleteMany({postId}, {session})
+        if(post?.mediaFiles){
+            for(const url of post.mediaFiles){
+                const mediaUrl = url.split('/')
+                const publicId = mediaUrl[mediaUrl.length - 1].split('.')[0]
 
-        await Like.deleteMany({postId}, {session})
+                await destroyOnCloudinary(publicId)
+            }
+        }
 
-        await Notification.deleteMany({relatedPostId: postId}, {session})
+        await Repost.deleteMany({postId: post?._id}, {session})
+
+        await Like.deleteMany({postId: post?._id}, {session})
+
+        await Notification.deleteMany({relatedPostId: post?._id}, {session})
 
         await Bookmark.updateMany(
-            { postIdArray: postId },
-            { $pull: { postIdArray: postId } },
+            { postIdArray: post?._id },
+            { $pull: { postIdArray: post?._id } },
             { session }
         )
 
-        const childPosts = await Post.find({parentPost: postId}).select('_id')
+        const childPosts = await Post.find({parentPost: post?._id}).select('_id')
 
         for(const childPost of childPosts){
-            await recursivePostDelete(childPost?._id, session)
+            await recursivePostDelete(childPost, session)
         }
 
     } catch (error) {
@@ -739,6 +743,9 @@ const postReplies = async (postId, currentUser) => {
             }
         },
         {
+            $sort : { createdAt: -1}
+        },
+        {
             $project: {
                 text: 1,
                 mediaFiles: 1,
@@ -784,7 +791,7 @@ const parentPostHierarchy = async (postId, currentUser) => {
                     $reverseArray: {
                         $sortArray: {
                             input: '$hierarchy',
-                            sortBy: { createdAt: 1 }
+                            sortBy: { createdAt: -1 }
                         }
                     }
                 }
@@ -889,7 +896,7 @@ const parentPostHierarchy = async (postId, currentUser) => {
         },
         {
             $addFields: {
-                userBookmarked: {$gt: [{$size: { $ifNull: ['$bookmarkInfo', []] } }, 0]}
+                'hierarchy.userBookmarked': {$gt: [{$size: { $ifNull: ['$bookmarkInfo', []] } }, 0]}
             }
         },
         {
@@ -1018,6 +1025,9 @@ const userPosts = async (user, currentUser) => {
             $addFields: {
                 userBookmarked: {$gt: [{$size: { $ifNull: ['$bookmarkInfo', []] } }, 0]}
             }
+        },
+        {
+            $sort: { createdAt: -1 }
         },
         {
             $project: {
@@ -1169,6 +1179,9 @@ const userReplies = async (user, currentUser) => {
             $addFields: {
                 userBookmarked: {$gt: [{$size: { $ifNull: ['$bookmarkInfo', []] } }, 0]}
             }
+        },
+        {
+            $sort: { createdAt: -1 }
         },
         {
             $project: {
@@ -1342,6 +1355,11 @@ const postsLiked = async (user, currentUser) => {
                 userReposted: {$first: '$userReposted'},
                 repostCount: {$first: '$repostCount'},
 
+            }
+        },
+        {
+            $sort: {
+                createdAt: -1
             }
         }
     ])

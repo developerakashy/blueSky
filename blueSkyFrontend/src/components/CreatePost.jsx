@@ -3,7 +3,7 @@ import { useUser } from "../context/userContext"
 import axios from "axios"
 import PostCard from "./PostCard"
 import Verification from "./Verification"
-import { Image, X } from "lucide-react"
+import { Image, UserRound, X } from "lucide-react"
 import PostInput from "./PostInput"
 import { toast } from "react-toastify"
 
@@ -93,10 +93,10 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
 
         } catch (error) {
             console.log(error)
-            toast.error(error.response.data.message)
+            toast.error(error?.response?.data?.message)
 
         } finally {
-          setTimeout(() => setLoading(false), 700)
+            setTimeout(() => setLoading(false), 700)
         }
     }
 
@@ -120,7 +120,13 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                 {parentPost &&
                 <div className="mx-4 flex gap-2">
                     <div className='min-w-12 flex flex-col gap-2 items-center'>
-                        <img className='block min-h-10 w-10 rounded-full object-cover' src={parentPost?.userId?.avatar} alt="" />
+                        {!parentPost?.userId?.avatar ?
+                            <div className='min-h-10 w-10 bg-slate-200 flex justify-center items-center rounded-full object-cover'>
+                                <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
+                            </div> :
+
+                            <img className='h-10 w-10 rounded-full object-cover' src={parentPost?.userId?.avatar} alt="" />
+                        }
                         <div className="h-full pb-3 border-[1px] bg-gray-300"></div>
                     </div>
 
@@ -129,7 +135,7 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                             <div className='flex'>
                                 <p className="text-sm self-start font-semibold">{parentPost?.userId?.fullname?.toUpperCase()}</p>
                                 <p className='self-start text-gray-600 mx-1'>·</p>
-                                <p className='text-gray-600 text-sm self-start'>@{user?.username}</p>
+                                <p className='text-gray-600 text-sm self-start'>@{parentPost?.userId?.username}</p>
                                 <p className='self-start text-gray-600 mx-1'>·</p>
                                 <p className='text-gray-600 text-sm'>8m</p>
                             </div>
@@ -139,7 +145,7 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                             <p className='max-w-[560px] tracking-normal leading-tight text-[15px]'>{parentPost?.text}</p>
                             {parentPost?.mediaFiles &&
                                 <div className="mt-2">
-                                {parentPost?.mediaFiles.map(url => <p className="max-w-[500px] text-ellipsis overflow-hidden">{url}</p>)}
+                                {parentPost?.mediaFiles.map(url => <p key={url} className="max-w-[500px] text-ellipsis overflow-hidden">{url}</p>)}
                                 </div>
                             }
                         </div>
@@ -159,7 +165,13 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                 </div>
                 }
                 <div className="bg-white mx-4 flex items-start gap-2 mb-4 relative">
-                    <img className="h-10 w-10 mx-1 rounded-full object-cover" src={user?.avatar} alt="" />
+                    {!user?.avatar ?
+                        <div className='h-10 w-10 mx-1 bg-slate-200 flex justify-center items-center rounded-full object-cover'>
+                            <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
+                        </div> :
+
+                        <img className='h-10 w-10 mx-1 rounded-full object-cover' src={user?.avatar} alt="" />
+                    }
                     <div className="w-[512px] flex flex-col gap-2">
 
                         <PostInput setContent={setText} content={text}/>
@@ -203,7 +215,7 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                         onChange={(e) => handleFileInput(e)}
                     />
 
-                    <button className="bg-indigo-600 text-white px-4 py-1 rounded-full" onClick={uploadFiles}>Publish</button>
+                    <button className="cursor-pointer bg-indigo-600 text-white px-4 py-1 rounded-full" onClick={uploadFiles}>Publish</button>
                 </div>
                 </div>
             }
