@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import UserCard from "../components/UserCard";
 
 function FollowingsAndFollowers(){
@@ -16,7 +16,7 @@ function FollowingsAndFollowers(){
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8003/user/${username}`, {withCredentials: true})
+                const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/user/${username}`, {withCredentials: true})
                 console.log(data)
                 setUser(data.data)
             } catch (error) {
@@ -30,7 +30,7 @@ function FollowingsAndFollowers(){
     useEffect(() => {
         const fetchFollowers = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8003/follow/followers/${user?._id}`,{withCredentials: true})
+                const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/follow/followers/${user?._id}`,{withCredentials: true})
                 console.log(data)
                 setFollowers(data.data)
             } catch (error) {
@@ -40,7 +40,7 @@ function FollowingsAndFollowers(){
 
         const fetchFollowings = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8003/follow/followings/${user?._id}`, {withCredentials: true})
+                const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/follow/followings/${user?._id}`, {withCredentials: true})
                 console.log(data)
                 setFollowings(data.data)
             } catch (error) {

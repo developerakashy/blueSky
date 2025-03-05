@@ -9,7 +9,7 @@ function Bookmark(){
 
         const fetchUserBookmark = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8003/bookmark`, {withCredentials: true})
+                const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/bookmark`, {withCredentials: true})
 
                 setPosts(data.data)
                 console.log(data)

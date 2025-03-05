@@ -13,7 +13,7 @@ function Verification({setPublishPost}){
         setLoading(true)
 
         try {
-            const { data } = await axios.post(`http://localhost:8003/user/send-verification-email`,{}, {withCredentials: true})
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/send-verification-email`,{}, {withCredentials: true})
             console.log(data.data)
             user.verificationCodeExpiry = data?.data?.codeExpiration
             toast.success('verification code sent successfully')
@@ -54,7 +54,7 @@ function Verification({setPublishPost}){
         setLoading(true)
 
         try {
-            const { data } = await axios.post(`http://localhost:8003/user/verify-code`, {verificationCode}, {withCredentials: true})
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/verify-code`, {verificationCode}, {withCredentials: true})
 
             user.isVerified = data?.data?.isVerified
             setTimeout(() => {

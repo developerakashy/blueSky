@@ -11,6 +11,7 @@ import { io } from "../app.js";
 import { Notification, NotificationType } from "../models/notification.models.js";
 import { Repost } from "../models/repost.models.js";
 import { Bookmark } from "../models/bookmark.models.js";
+import { Follow } from "../models/follow.models.js";
 
 const publishPost = asyncHandler(async (req, res) => {
     const { text, parentPostId } = req.body
@@ -322,6 +323,362 @@ const getPostById = asyncHandler(async (req, res) => {
     }
 })
 
+const getFollowingPosts = asyncHandler(async (req, res) => {
+    const { page } = req.query
+
+    const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
+
+    try {
+
+        const posts = await Follow.aggregate([
+            {
+                $match: {
+                    userIdArray: req?.user?._id
+                }
+            },
+            {
+                $lookup: {
+                    from: 'posts',
+                    localField: 'userId',
+                    foreignField: 'userId',
+                    as: 'post'
+                }
+            },
+            {
+                $unwind: "$post"
+            },
+            {
+                $match: {
+                    'post.parentPost': null
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'post.userId',
+                    foreignField: '_id',
+                    as: 'userInfo'
+                }
+            },
+            {
+                $addFields: {
+                    userId: {
+                        $first: '$userInfo'
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'posts',
+                    localField: 'post._id',
+                    foreignField: 'parentPost',
+                    as: 'replies'
+                }
+            },
+            {
+                $addFields: {
+                    replyCount: {
+                        $size: '$replies'
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'likes',
+                    localField: 'post._id',
+                    foreignField: 'postId',
+                    as: 'postLikes'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'reposts',
+                    localField: 'post._id',
+                    foreignField: 'postId',
+                    as: 'reposts'
+                }
+            },
+            {
+                $addFields: {
+                    likeCount: {
+                        $size: {
+                            $ifNull: [{ $first: '$postLikes.userIdArray' }, []]
+                        }
+                    },
+                    userLiked: {
+                        $in: [currentUser, {$ifNull: [{ $first: '$postLikes.userIdArray' }, []]}]
+                    },
+                    userReposted: {
+                        $gt: [
+                            {
+                              $size: {
+                                $filter: {
+                                  input: '$reposts',
+                                  as: 'repost',
+                                  cond: { $eq: ['$$repost.userId', currentUser] }
+                                }
+                              }
+                            },
+                            0
+                        ]
+                    },
+                    repostCount: {
+                      $size: {
+                        $ifNull: ['$reposts', []]
+                      }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'bookmarks',
+                    let: { postId: '$post._id' },
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: {
+                            $and: [
+                              { $eq: ['$userId', currentUser] },
+                              { $in: ['$$postId', '$postIdArray'] }
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    as: 'bookmarkInfo'
+                }
+            },
+            {
+                $addFields: {
+                    userBookmarked: {$gt: [{$size: { $ifNull: ['$bookmarkInfo', []] } }, 0]}
+                }
+            },
+            {
+                $sort : { 'post.createdAt': -1}
+            },
+            {
+                $skip: (page - 1) * 10
+            },
+            {
+                $limit: 10
+            },
+            {
+                $project: {
+                    _id: '$post._id',
+                    text: '$post.text',
+                    mediaFiles: '$post.mediaFiles',
+                    userId: {
+                        _id: 1,
+                        fullname: 1,
+                        username: 1,
+                        email: 1,
+                        avatar: 1,
+                        coverImage: 1,
+                        about: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        isVerified: 1
+                    },
+                    parentPost:'$post.parentPost',
+                    isPublic: '$post.isPublic',
+                    createdAt: '$post.createdAt',
+                    updatedAt: '$post.updatedAt',
+                    replyCount: 1,
+                    likeCount: 1,
+                    userLiked: 1,
+                    userBookmarked: 1,
+                    userReposted: 1,
+                    repostCount: 1
+
+                }
+            }
+        ])
+
+        return res.status(200).json(new ApiResponse(200, posts, 'followingPosts fetched success'))
+    } catch (error) {
+        throw new ApiError(400, error?.message || 'something went wrong')
+    }
+
+})
+
+const getQueriedPost = asyncHandler(async (req, res) => {
+    const {query = '', page} = req.query
+
+    const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
+    const pipeline = []
+
+    pipeline.push(
+        {
+            $sort: { createdAt: -1 }
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'userId',
+                foreignField: '_id',
+                as: 'userInfo'
+            }
+        },
+        {
+            $addFields: {
+                userId: {
+                    $first: '$userInfo'
+                }
+            }
+        }
+    )
+
+
+    if(query?.trim()){
+
+
+        pipeline.push(
+            {
+                $match: {
+                    $or: [
+                        {text: {$regex: query, $options: 'i'}},
+                        {'userId.username': {$regex: query, $options: 'i'}},
+                        {'userId.fullname': {$regex: query, $options: 'i'}},
+
+                    ]
+                }
+            },{
+                $lookup: {
+                    from: 'posts',
+                    localField: '_id',
+                    foreignField: 'parentPost',
+                    as: 'replies'
+                }
+            },
+            {
+                $addFields: {
+                    replyCount: {
+                        $size: '$replies'
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'likes',
+                    localField: '_id',
+                    foreignField: 'postId',
+                    as: 'postLikes'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'reposts',
+                    localField: '_id',
+                    foreignField: 'postId',
+                    as: 'reposts'
+                }
+            },
+            {
+                $addFields: {
+                    likeCount: {
+                        $size: {
+                            $ifNull: [{ $first: '$postLikes.userIdArray' }, []]
+                        }
+                    },
+                    userLiked: {
+                        $in: [currentUser, {$ifNull: [{ $first: '$postLikes.userIdArray' }, []]}]
+                    },
+                    userReposted: {
+                        $gt: [
+                            {
+                              $size: {
+                                $filter: {
+                                  input: '$reposts',
+                                  as: 'repost',
+                                  cond: { $eq: ['$$repost.userId', currentUser] }
+                                }
+                              }
+                            },
+                            0
+                        ]
+                    },
+                    repostCount: {
+                      $size: {
+                        $ifNull: ['$reposts', []]
+                      }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'bookmarks',
+                    let: { postId: '$_id' },
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: {
+                            $and: [
+                              { $eq: ['$userId', currentUser] },
+                              { $in: ['$$postId', '$postIdArray'] }
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    as: 'bookmarkInfo'
+                }
+            },
+            {
+                $addFields: {
+                    userBookmarked: {$gt: [{$size: { $ifNull: ['$bookmarkInfo', []] } }, 0]}
+                }
+            },
+            {
+                $sort : { createdAt: -1}
+            },
+            {
+                $skip: (page - 1) * 10
+            },
+            {
+                $limit: 10
+            },
+            {
+                $project: {
+                    text: 1,
+                    mediaFiles: 1,
+                    userId: {
+                        _id: 1,
+                        fullname: 1,
+                        username: 1,
+                        email: 1,
+                        avatar: 1,
+                        coverImage: 1,
+                        about: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        isVerified: 1
+                    },
+                    parentPost: 1,
+                    isPublic: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    replyCount: 1,
+                    likeCount: 1,
+                    userLiked: 1,
+                    userBookmarked: 1,
+                    userReposted: 1,
+                    repostCount: 1
+
+                }
+            }
+        )
+    }
+
+    try {
+        const posts = await Post.aggregate(pipeline)
+
+        return res.status(200).json(new ApiResponse(200, posts, 'posts fetched success'))
+
+    } catch (error) {
+        throw new ApiError(400, error?.message || 'something went wrong')
+    }
+})
+
 const getAllPosts = asyncHandler(async (req, res) => {
     const { page } = req.query
     console.log(page)
@@ -483,6 +840,158 @@ const getAllPosts = asyncHandler(async (req, res) => {
     }
 })
 
+const mostRepostedPost = asyncHandler(async (req, res) => {
+    const { page } = req.query
+    console.log(page)
+    const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
+
+    try {
+        const posts = await Post.aggregate([
+            {
+                $sort: {createdAt : -1}
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'userId',
+                    foreignField: '_id',
+                    as: 'userInfo'
+                }
+            },
+            {
+                $addFields: {
+                    userId: {
+                        $first: '$userInfo'
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'posts',
+                    localField: '_id',
+                    foreignField: 'parentPost',
+                    as: 'replies'
+                }
+            },
+            {
+                $addFields: {
+                    replyCount: {
+                        $size: '$replies'
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'likes',
+                    localField: '_id',
+                    foreignField: 'postId',
+                    as: 'postLikes'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'reposts',
+                    localField: '_id',
+                    foreignField: 'postId',
+                    as: 'reposts'
+                }
+            },
+            {
+                $addFields: {
+                    likeCount: {
+                        $size: {
+                            $ifNull: [{ $first: '$postLikes.userIdArray' }, []]
+                        }
+                    },
+                    userLiked: {
+                        $in: [currentUser, {$ifNull: [{ $first: '$postLikes.userIdArray' }, []]}]
+                    },
+                    userReposted: {
+                        $gt: [
+                            {
+                              $size: {
+                                $filter: {
+                                  input: '$reposts',
+                                  as: 'repost',
+                                  cond: { $eq: ['$$repost.userId', currentUser] }
+                                }
+                              }
+                            },
+                            0
+                        ]
+                    },
+                    repostCount: {
+                      $size: {
+                        $ifNull: ['$reposts', []]
+                      }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'bookmarks',
+                    let: { postId: '$_id' },
+                    pipeline: [
+                      {
+                        $match: {
+                          $expr: {
+                            $and: [
+                              { $eq: ['$userId', currentUser] },
+                              { $in: ['$$postId', '$postIdArray'] }
+                            ]
+                          }
+                        }
+                      }
+                    ],
+                    as: 'bookmarkInfo'
+                }
+            },
+            {
+                $addFields: {
+                    userBookmarked: {$gt: [{$size: { $ifNull: ['$bookmarkInfo', []] } }, 0]}
+                }
+            },
+            {
+                $sort : { repostCount: -1}
+            },
+            {
+                $project: {
+                    text: 1,
+                    mediaFiles: 1,
+                    userId: {
+                        _id: 1,
+                        fullname: 1,
+                        username: 1,
+                        email: 1,
+                        avatar: 1,
+                        coverImage: 1,
+                        about: 1,
+                        createdAt: 1,
+                        updatedAt: 1,
+                        isVerified: 1
+                    },
+                    parentPost: 1,
+                    isPublic: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    replyCount: 1,
+                    likeCount: 1,
+                    userLiked: 1,
+                    userBookmarked: 1,
+                    userReposted: 1,
+                    repostCount: 1
+
+                }
+            }
+        ])
+
+
+        return res.status(200).json(new ApiResponse(200, posts, 'posts fetched successfully'))
+    } catch (error) {
+        throw new ApiError(400, error?.message || 'somrhting went wrong')
+    }
+})
+
 const getUserPosts = asyncHandler(async (req, res) => {
     const { username } = req.params
     const currentUser = req?.user?._id ? new mongoose.Types.ObjectId(req.user._id) : ''
@@ -496,7 +1005,14 @@ const getUserPosts = asyncHandler(async (req, res) => {
         const replies = await userReplies(userInfo, currentUser)
         const liked = await postsLiked(userInfo, currentUser)
 
-        return res.status(200).json(new ApiResponse(200, {posts, replies, liked}, "user posts fetched successfully"))
+        const repliesWithParentPost = await Promise.all(
+            replies.map(async (reply) => {
+                const parentPost = await parentPostHierarchy(reply?._id, currentUser)
+                return {...reply, parentPost}
+            })
+        )
+
+        return res.status(200).json(new ApiResponse(200, {posts, repliesWithParentPost, liked}, "user posts fetched successfully"))
     } catch (error) {
         throw new ApiError(400, error?.message || 'error fetching posts')
     }
@@ -786,7 +1302,6 @@ const parentPostHierarchy = async (postId, currentUser) => {
         },
         {
             $project: {
-                replies: 1,
                 hierarchy: {
                     $reverseArray: {
                         $sortArray: {
@@ -1199,7 +1714,6 @@ const userReplies = async (user, currentUser) => {
                     updatedAt: 1,
                     isVerified: 1
                 },
-                parentPost: 1,
                 isPublic: 1,
                 createdAt: 1,
                 updatedAt: 1,
@@ -1373,5 +1887,8 @@ export {
     deletePost,
     getPostById,
     getAllPosts,
-    getUserPosts
+    getUserPosts,
+    getFollowingPosts,
+    getQueriedPost,
+    mostRepostedPost
 }

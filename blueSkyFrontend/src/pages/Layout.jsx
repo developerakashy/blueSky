@@ -1,5 +1,5 @@
 import React from 'react'
-import { Outlet } from 'react-router'
+import { Outlet, ScrollRestoration } from 'react-router-dom'
 import Nav from '../components/Nav'
 import { useUser } from '../context/userContext'
 import CreatePost from '../components/CreatePost'
@@ -13,14 +13,26 @@ function Layout(){
 
     return (
         <div className='flex justify-center'>
+            <ScrollRestoration/>
+
             <SocketConnection setNotifications={setNotifications}/>
-            {publishPost?.publish && <CreatePost setPosts={publishPost?.setPosts} parentPost={publishPost.parentPost} setPublishPost={setPublishPost}/>}
+
+            {publishPost?.publish &&
+                <CreatePost
+                    setPosts={publishPost?.setPosts}
+                    parentPost={publishPost.parentPost}
+                    setPublishPost={setPublishPost}
+                />
+            }
+
             <div className='hidden md:flex sticky top-0 h-screen w-full justify-end max-w-[450px]'>
                 <Nav/>
             </div>
+
             <div className='sm:min-w-[650px] w-full max-w-[650px] border-x-1 border-slate-200'>
                 <Outlet/>
             </div>
+
             <div className='hidden lg:block sticky top-0 w-full max-w-[450px] h-screen'>
                 <Search/>
                 <UserRecommend/>

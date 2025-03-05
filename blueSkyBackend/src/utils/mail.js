@@ -4,9 +4,10 @@ import { User } from '../models/user.models.js'
 import { ApiError } from './ApiError.js'
 import { Resend } from 'resend';
 import { response } from 'express';
+import dotenv from "dotenv";
+dotenv.config();
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
-
 const sendEmail = async (email, emailType, userId) => {
 
     try {

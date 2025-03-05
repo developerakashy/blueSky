@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { useUser } from "../context/userContext";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { usePostContext } from "../context/postContext";
 import { Bookmark, Heart, Repeat2, UserRound } from "lucide-react";
 import PostText from "./PostText";
@@ -9,7 +9,8 @@ import formatTimeLine from "../utils/formatTimeLine";
 import { toast } from "react-toastify";
 
 
-function PostCard({post, repliedTo}){
+function PostCard({post, repliedTo, parentPost}){
+
     const navigate = useNavigate()
     const {setPosts} = usePostContext()
     const {user: loggedInUser, publishPost, setPublishPost, setLoading} = useUser()
@@ -38,7 +39,10 @@ function PostCard({post, repliedTo}){
     const imageUrl = post?.mediaFiles
     const mediaLength = imageUrl?.length
 
-
+    const redirectUserProfile = (e) => {
+        e.stopPropagation()
+        navigate(`/user/${user?.username}`)
+    }
 
 
     const handleDropDown = (e) => {
@@ -54,7 +58,7 @@ function PostCard({post, repliedTo}){
             setLoading(true)
 
             try {
-                const { data } = await axios.delete(`http://localhost:8003/post/${post?._id}`, {withCredentials: true})
+                const { data } = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/post/${post?._id}`, {withCredentials: true})
 
                 console.log(data)
                 setPosts(prev => prev.filter(post => post?._id !== data?.data?._id))
@@ -123,6 +127,10 @@ function PostCard({post, repliedTo}){
 
     const handelPostReply = (e) => {
         e.stopPropagation()
+        if(!loggedInUser?._id) {
+            toast.error('Log in to reply on post')
+            return
+        }
         setPublishPost({publish: true, parentPost: post})
     }
 
@@ -137,6 +145,11 @@ function PostCard({post, repliedTo}){
 
     const handlePostLike = (e) => {
         e.stopPropagation()
+        if(!loggedInUser?._id) {
+            toast.error('Log in to like the post')
+            return
+        }
+
         if(likeTimeoutRef.current){
             clearTimeout(likeTimeoutRef.current)
         }
@@ -149,7 +162,7 @@ function PostCard({post, repliedTo}){
     useEffect(() => {
         const togglePostLike = async () => {
             try {
-                const { data } = await axios.post(`http://localhost:8003/like/${post._id}`, {}, {withCredentials: true})
+                const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/like/${post._id}`, {}, {withCredentials: true})
 
                 return data?.data?.userIdArray?.length
             } catch (error) {
@@ -174,6 +187,10 @@ function PostCard({post, repliedTo}){
 
     const handleBookmark = (e) => {
         e.stopPropagation()
+        if(!loggedInUser?._id) {
+            toast.error('Log in to bookmark the post')
+            return
+        }
 
         if(bookmarkTimeoutRef.current){
             clearTimeout(bookmarkTimeoutRef.current)
@@ -185,7 +202,7 @@ function PostCard({post, repliedTo}){
     useEffect(() => {
         const toggleBookmark = async () =>  {
             try {
-                const { data } = await axios.post(`http://localhost:8003/bookmark/${post?._id}`, {}, {withCredentials: true})
+                const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/bookmark/${post?._id}`, {}, {withCredentials: true})
 
                 return data.data?.postIdArray?.indexOf(post?._id) === -1 ? false : true
             } catch (error) {
@@ -206,6 +223,10 @@ function PostCard({post, repliedTo}){
 
     const handleRepost = (e) => {
         e.stopPropagation()
+        if(!loggedInUser?._id) {
+            toast.error('Log in to repost the post')
+            return
+        }
 
         if(repostTimeoutRef.current){
             clearTimeout(repostTimeoutRef.current)
@@ -218,7 +239,7 @@ function PostCard({post, repliedTo}){
     useEffect(() => {
         const togglePostRepost = async () => {
             try {
-                const { data } = await axios.post(`http://localhost:8003/repost/${post?._id}`, {}, {withCredentials: true})
+                const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/repost/${post?._id}`, {}, {withCredentials: true})
 
                 return data?.data?.repostCount || 0
             } catch (error) {
@@ -242,27 +263,31 @@ function PostCard({post, repliedTo}){
 
     return(
         <>
-        <div onClick={() => navigate(`/post/${post?._id}`)} className={`cursor-pointer hover:bg-slate-50 border-b border-slate-200 px-5 pt-3 pb-[1.5px] flex gap-2`}>
-            <div className='w-12 flex justify-center'>
+        <div onClick={() => navigate(`/post/${post?._id}`)} className={`cursor-pointer hover:bg-slate-50 ${parentPost ? '' : 'border-b'} border-slate-200 px-5 flex gap-2`}>
+            <div className={`w-12 flex flex-col items-center ${(parentPost && post?.parentPost) ? '' : 'pt-3'}`}>
+                {(parentPost && post?.parentPost) &&
+                    <div className="border h-3 border-slate-300"></div>
+                }
+
                 {!user?.avatar ?
-                    <div className='h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
+                    <div onClick={(e) => redirectUserProfile(e)} className='min-h-10 max-h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
                         <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
                     </div> :
 
-                    <img className='h-10 w-10 rounded-full object-cover' src={user?.avatar} alt="" />
+                    <img onClick={(e) => redirectUserProfile(e)} className='min-h-10 max-h-10 w-10 rounded-full object-cover' src={user?.avatar} alt="" />
+                }
+
+                {(parentPost) &&
+                    <div className="border h-full border-slate-300"></div>
                 }
             </div>
 
-            <div className='w-full'>
+            <div className='w-full pt-3'>
                 <div className='flex justify-between'>
-                    <div onClick={(e) => {
-                        e.stopPropagation()
-                        navigate(`/user/${user?.username}`)
-
-                        }} className='flex items-center'>
-                        <p className="text-[15px] font-semibold hover:underline">{user?.fullname?.toUpperCase()}</p>
+                    <div onClick={(e) => redirectUserProfile(e)} className='flex items-center'>
+                        <p className="text-sm font-semibold hover:underline">{user?.fullname?.toUpperCase()}</p>
                         <div className='h-1 w-1 bg-gray-600 rounded-xl mx-1'></div>
-                        <p className='text-gray-600'>@{user?.username}</p>
+                        <p className='text-gray-600 text-sm'>@{user?.username}</p>
                         <div className='h-1 w-1 bg-gray-600 rounded-full mx-1'></div>
                         <p className='text-gray-600 text-sm'>{formatTimeLine(post?.createdAt)}</p>
                     </div>
@@ -288,8 +313,8 @@ function PostCard({post, repliedTo}){
                         <div className={`grid ${mediaGallery()} mt-2`}>
                             {imageUrl && imageUrl.map((url, index) =>
                                 url.split('/')[4] === 'image' ?
-                                <img key={url} onClick={(e) => handleMediaPreview(e, index)} className={`${mediaLength === 3 && index === 0 && 'row-span-2'} ${mediaLength > 1 ? 'w-full' : 'w-fit rounded-2xl border-[1px]'} h-full object-cover`} src={url} alt="Image file" /> :
-                                <video key={url} onClick={(e) => handleMediaPreview(e, index)} className={`${mediaLength === 3 && index === 0 && 'row-span-2'} ${mediaLength > 1 ? 'w-full' : 'w-fit rounded-2xl border-[1px]'} h-full w-full bg-black`}  controls>
+                                <img key={url} onClick={(e) => handleMediaPreview(e, index)} className={`${mediaLength === 3 && index === 0 && 'row-span-2'} ${mediaLength > 1 ? 'w-full' : 'w-fit rounded-2xl border border-slate-200'} h-full object-cover`} src={url} alt="Image file" /> :
+                                <video key={url} onClick={(e) => handleMediaPreview(e, index)} className={`${mediaLength === 3 && index === 0 && 'row-span-2'} ${mediaLength > 1 ? 'w-full' : 'w-fit rounded-2xl border border-slate-200'} h-full w-full bg-black`}  controls>
                                     <source src={url} alt='video'/>
                                 </video>
                             )}
@@ -335,7 +360,7 @@ function PostCard({post, repliedTo}){
 
         {previewImage &&
         <div className="z-30 fixed right-0 top-0 bottom-0 w-screen h-screen bg-black/90 flex flex-col items-center justify-center">
-            <button className="fixed top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
+            <button className="cursor-pointer fixed top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
             <div className="h-[95%] flex items-center">
                 <img className="min-h-[600px] max-h-full object-contain" src={imageUrl[currentIndex]} alt="" />
             </div>
@@ -349,7 +374,7 @@ function PostCard({post, repliedTo}){
 
         {previewVideo &&
         <div className="z-30 fixed right-0 top-0 w-screen h-screen bg-black/90 flex flex-col items-center justify-center">
-            <button className="fixed z-40 top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
+            <button className="cursor-pointer fixed z-40 top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
             <div className="h-[95%] flex items-center object-contain">
                 <video className="max-h-full min-w-[600px]" src={imageUrl[currentIndex]} controls>
                     <source src={imageUrl[currentIndex]}/>

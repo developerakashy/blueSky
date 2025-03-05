@@ -8,7 +8,7 @@ function SocketConnection({ setNotifications }) {
     useEffect(() => {
         if (!user) return;
 
-        const socket = io("http://localhost:8003", {
+        const socket = io(`${import.meta.env.VITE_BACKEND_URL}`, {
             transports: ["websocket"],
             withCredentials: true,
             query: { userId: user?._id },

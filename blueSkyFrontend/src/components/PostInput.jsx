@@ -19,7 +19,7 @@ function PostInput({setContent, content}){
         setLoading(true)
         try {
 
-            const { data } = await axios.get(`http://localhost:8003/user/all?search=${searchStr}`, {withCredentials: true})
+            const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/user/all?search=${searchStr}`, {withCredentials: true})
             console.log(data.data)
             setSuggestion(data.data)
 

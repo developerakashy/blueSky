@@ -81,7 +81,7 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
 
 
         try {
-            const { data } = await axios.post(`http://localhost:8003/${parentPost?._id ? 'reply' : 'post'}/publish`, formdata, {
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/${parentPost?._id ? 'reply' : 'post'}/publish`, formdata, {
                 headers: {
                     "Content-Type": "multipart/form-data"
                 },
@@ -125,9 +125,9 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                                 <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
                             </div> :
 
-                            <img className='h-10 w-10 rounded-full object-cover' src={parentPost?.userId?.avatar} alt="" />
+                            <img className='min-h-10 w-10 rounded-full object-cover' src={parentPost?.userId?.avatar} alt="" />
                         }
-                        <div className="h-full pb-3 border-[1px] bg-gray-300"></div>
+                        <div className="h-full pb-3 border border-slate-300"></div>
                     </div>
 
                     <div className=''>
@@ -156,7 +156,7 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                 {parentPost &&
                 <div className="py-2 mx-4 flex gap-2">
                     <div className='w-12 flex justify-center'>
-                    <div className="h-full py-4 border-[1px] bg-gray-300"></div>
+                    <div className="h-full py-4 border border-slate-300"></div>
                     </div>
 
                     <div className=''>

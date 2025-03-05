@@ -1,6 +1,5 @@
 import React, { useState } from "react"
 import { useUser } from "../context/userContext"
-import { useSearchParams } from "react-router"
 import axios from "axios"
 import { Image, UserRound, X } from "lucide-react"
 import { toast } from "react-toastify"
@@ -41,17 +40,17 @@ function EditProfile({setEdit, setUser, user}){
 
         const formData = new FormData()
 
-        if(fullname?.toUpperCase() !== user?.fullname?.toUpperCase()) formData.append('fullname', fullname)
-        if(about !== user?.about) formData.append('about', about)
+        if(fullname?.toUpperCase()?.trim() !== user?.fullname?.toUpperCase()?.trim()) formData.append('fullname', fullname)
+        if(about?.trim() !== user?.about?.trim()) formData.append('about', about)
         if(coverImageFile?.name) formData.append('coverImage', coverImageFile)
         if(avatarImageFile?.name) formData.append('avatarImage', avatarImageFile)
 
         setLoading(true)
         try {
 
-            const { data } = await axios.post('http://localhost:8003/user/update-profile', formData, {withCredentials: true})
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/update-profile`, formData, {withCredentials: true})
             console.log(data?.data)
-            setUser(data?.data)
+            setUser(prev => ({...prev, ...data?.data}))
             setTimeout(() => {
                 toast.success('Post updated successfully')
                 setEdit(false)

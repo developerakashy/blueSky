@@ -25,7 +25,7 @@ export const fetchPosts = async (query) => {
         }
 
         const searchString = buildQueryString(params)
-        const response = await axios.get(`http://localhost:8003/post/?${searchString}`, {withCredentials: true})
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/post/?${searchString}`, {withCredentials: true})
         console.log(response.data.data)
 
         return response.data.data

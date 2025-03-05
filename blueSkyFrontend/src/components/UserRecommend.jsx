@@ -14,7 +14,7 @@ function UserRecommend(){
 
             setLoading(true)
             try {
-                const { data } = await axios.get(`http://localhost:8003/follow/most-followed`)
+                const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/follow/most-followed`)
                 console.log(data)
                 setUsers(data?.data)
             } catch (error) {

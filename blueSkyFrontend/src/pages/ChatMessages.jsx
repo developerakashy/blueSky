@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { useUser } from "../context/userContext";
 import formatDate from "../utils/formatDate";
 import formatTime from "../utils/formatTime";
@@ -29,7 +29,7 @@ function ChatMessages(){
     useState(() => {
         const fetchMessages = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8003/chat/messages/${chatId}`, {withCredentials: true})
+                const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/chat/messages/${chatId}`, {withCredentials: true})
                 console.log(data)
                 setMessages(data?.data?.messages)
                 setReceiver(data?.data?.chatWithUser)
@@ -47,7 +47,7 @@ function ChatMessages(){
         if(!msgText?.trim()) return
 
         try {
-            const { data } = await axios.post(`http://localhost:8003/chat/message`,
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/chat/message`,
                 {
                     receiverUserId: receiver?._id,
                     message: msgText

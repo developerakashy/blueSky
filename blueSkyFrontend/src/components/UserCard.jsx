@@ -1,6 +1,6 @@
 import { UserRound } from "lucide-react";
 import React from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 function UserCard({user}){
     const navigate = useNavigate()

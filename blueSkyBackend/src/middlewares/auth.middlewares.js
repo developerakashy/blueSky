@@ -5,12 +5,23 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncRequestHandler.js";
 import jwt from 'jsonwebtoken'
 
+
+const isPublicRoute = (req) => {
+    return (
+        (req?.baseUrl === '/post') &&
+            req?.method === 'GET'
+    )
+}
+
 const verifyJwtToken = asyncHandler(async (req, res, next) => {
 
     const incomingAccessToken = req?.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
     const incomingRefreshToken = req?.cookies?.refreshToken
 
     if(!incomingAccessToken?.trim()){
+        if(isPublicRoute(req)) return next()
+        
+
         throw new ApiError(400, 'user not loggedIn')
     }
 
@@ -24,7 +35,7 @@ const verifyJwtToken = asyncHandler(async (req, res, next) => {
         if(!user) throw new ApiError(400, 'token mismatch')
 
         req.user = user
-        
+
         return next()
 
     } catch (error) {

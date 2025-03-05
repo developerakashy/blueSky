@@ -13,6 +13,9 @@ import chatRouter from './routes/chat.routes.js'
 import bookmarkRouter from './routes/bookmark.routes.js'
 import repostRouter from './routes/repost.routes.js'
 import { ApiError } from './utils/ApiError.js'
+import dotenv from "dotenv";
+dotenv.config();
+
 
 const app = express()
 const server = createServer(app)

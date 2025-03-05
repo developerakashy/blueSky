@@ -1,7 +1,7 @@
 import axios from "axios"
 import { UserRound } from "lucide-react"
 import { useState } from "react"
-import { useNavigate } from "react-router"
+import { useNavigate } from "react-router-dom"
 
 function ChatCard({chat, chatWithUser}){
     const [chatMenu, setChatMenu] = useState(false)
@@ -18,7 +18,7 @@ function ChatCard({chat, chatWithUser}){
         e.stopPropagation()
 
         try {
-            const { data } = await axios.delete(`http://localhost:8003/chat/${chat?._id}`,{withCredentials: true})
+            const { data } = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/chat/${chat?._id}`,{withCredentials: true})
             console.log(data)
 
         } catch (error) {
@@ -30,7 +30,7 @@ function ChatCard({chat, chatWithUser}){
         e.stopPropagation()
 
         try {
-            const {data} = await axios.delete(`http://localhost:8003/chat/messages/${chat?._id}`, {withCredentials: true})
+            const {data} = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/chat/messages/${chat?._id}`, {withCredentials: true})
             console.log(data)
             chat.lastMessage = ''
         } catch (error) {

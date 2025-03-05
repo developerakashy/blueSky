@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useUser } from '../context/userContext'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify'
 import 'ldrs/mirage'
 import 'ldrs/dotPulse'
@@ -84,14 +84,12 @@ function Login(){
         setLoading(true)
 
         try {
-            const { data } = await axios.post(`http://localhost:8003/user/login`, formData, {withCredentials: true})
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/login`, formData, {withCredentials: true})
             console.log(data.data)
             setUser(data.data)
 
             setTimeout(() => {
-                toast.success(`"${data.data.fullname}" logged in successfully`, {
-                    autoClose: 2500,
-                })
+                toast.success(`You logged in successfully`)
                 navigate('/')
 
             }, 500)

@@ -2,23 +2,28 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "../context/userContext";
 import usePosts from "../hooks/usePosts";
 import PostCard from "../components/PostCard";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import EditProfile from "../components/EditProfile";
 import { Image, UserRound } from "lucide-react";
 import { toast } from "react-toastify";
 import { ring2 } from "ldrs";
+import { useLocation } from "react-router-dom";
 
 function Profile(){
     const { user: userLoggedIn } = useUser()
     const { username } = useParams()
     const navigate = useNavigate()
+    const location = useLocation()
+    let path = location.pathname.split('/').pop()
+
+    if(path === username) path = 'posts'
 
     const [data, setData] = useState({posts: [], replies: [], userLiked: []})
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
     const [edit, setEdit] = useState(false)
-    const [activeSection, setActiveSection] = useState('posts')
+    const [activeSection, setActiveSection] = useState(path)
 
     const [followed, setFollowed] = useState(user?.userFollowed)
     const [followerCount, setFollowerCount] = useState(user?.followerCount)
@@ -26,13 +31,35 @@ function Profile(){
     let followTimeoutRef = useRef()
 
 
+
     const renderPost = () => {
         switch(activeSection){
             case 'posts':
                 return data?.posts?.map((post) => <PostCard key={post._id} post={post}/>);
             case 'replies':
-                return data?.replies?.map((post) => <PostCard key={post._id} post={post}/>);
-            case 'userLiked':
+                return data?.replies?.map((post) => {
+
+                    let length = post?.parentPost?.length || 0
+
+                    return(
+                        <div key={post?._id}>
+                            {(length > 1) && <PostCard post={post?.parentPost?.[0]} parentPost={true}/>}
+                            {(length > 2) &&
+                                <div onClick={() => navigate(`/post/${post?.parentPost?.[0]?._id}`)} className="cursor-pointer hover:bg-slate-50 px-5 h-12 flex items-center">
+                                    <div className="w-11 h-full flex justify-center">
+                                        <div className="h-full border border-dashed border-slate-300"></div>
+                                    </div>
+
+                                    <p className="text-blue-500">Show more replies</p>
+
+                                </div>
+                            }
+                            {(length > 0) && <PostCard post={post?.parentPost?.[length - 1]} parentPost={true}/> }
+                            <PostCard post={post}/>
+                        </div>
+                    )
+                });
+            case 'likes':
                 return data?.userLiked?.map((post) => <PostCard key={post._id} post={post}/>);
             default:
                 return null
@@ -43,12 +70,12 @@ function Profile(){
         const fetchUserInfo = async () => {
             setLoading(true)
             try {
-                const { data: userInfo } = await axios.get(`http://localhost:8003/user/${username}`, {withCredentials: true})
-                const { data } = await axios.get(`http://localhost:8003/post/${username}/posts`, {withCredentials: true})
+                const { data: userInfo } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/user/${username}`, {withCredentials: true})
+                const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/post/${username}/posts`, {withCredentials: true})
                 setUser(userInfo.data)
-                setData({posts: data.data.posts, replies: data.data.replies, userLiked: data.data.liked })
+                setData({posts: data.data.posts, replies: data.data.repliesWithParentPost, userLiked: data.data.liked })
 
-                console.log(data)
+                console.log(data.data)
 
             } catch (error) {
                 console.log(error);
@@ -64,7 +91,12 @@ function Profile(){
         setData({})
         fetchUserInfo()
         document.body.scrollTo(0, 0)
+
     }, [username])
+
+    useEffect(() => {
+        setActiveSection(path)
+    }, [path])
 
 
     useEffect(() => {
@@ -95,7 +127,7 @@ function Profile(){
 
         const toggleFollow = async () => {
             try {
-                const { data } = await axios.post(`http://localhost:8003/follow/${user?._id}`, {}, {withCredentials:true})
+                const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/follow/${user?._id}`, {}, {withCredentials:true})
                 console.log(data)
                 return data?.data?.userIdArray?.length
             } catch (error) {
@@ -107,7 +139,7 @@ function Profile(){
 
         console.log(followed, wasFollowedRef)
         followTimeoutRef.current = setTimeout(async () => {
-            if(followed !== wasFollowedRef.current && user){
+            if(followed && followed !== wasFollowedRef.current && user){
                 const res = await toggleFollow()
                 wasFollowedRef.current = followed
                 setFollowerCount(prev => followed ? prev + 1 : prev - 1)
@@ -161,8 +193,8 @@ function Profile(){
                     <p className="text-gray-500 mt-2 text-[15px]">Joined October 2023</p>
 
                     <div className="mt-2 flex gap-4">
-                        <button onClick={() => navigate('followers')} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{followerCount}</span> Followers</button>
-                        <button onClick={() => navigate('followings')} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{user?.followingCount}</span> Followings</button>
+                        <button onClick={() => navigate('followers')} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{followerCount || 0}</span> Followers</button>
+                        <button onClick={() => navigate('followings')} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{user?.followingCount || 0}</span> Followings</button>
                     </div>
 
                 </div>
@@ -170,9 +202,9 @@ function Profile(){
             </div>
 
             <div className="border-b border-slate-200 mt-3 flex sticky top-15 z-30 bg-white">
-                <button onClick={() => setActiveSection('posts')} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'posts' ? 'text-black' : 'text-gray-500'}`}>Posts</button>
-                <button onClick={() => setActiveSection('replies')} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'replies' ? 'text-black' : 'text-gray-500'}`}>Replies</button>
-                <button onClick={() => setActiveSection('userLiked')} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'userLiked' ? 'text-black' : 'text-gray-500'}`}>Likes</button>
+                <button onClick={() => navigate(`/user/${username}`)} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'posts' ? 'text-black' : 'text-gray-500'}`}>Posts</button>
+                <button onClick={() => navigate(`/user/${username}/replies`)} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'replies' ? 'text-black' : 'text-gray-500'}`}>Replies</button>
+                <button onClick={() => navigate(`/user/${username}/likes`)} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'likes' ? 'text-black' : 'text-gray-500'}`}>Likes</button>
             </div>
 
             <div className="pb-128">
@@ -188,7 +220,7 @@ function Profile(){
                         ></l-ring-2>
                     </div>
                 }
-                {renderPost()}
+                {!loading && renderPost()}
             </div>
         </div>
     )

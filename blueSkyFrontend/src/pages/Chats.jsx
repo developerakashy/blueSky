@@ -1,7 +1,7 @@
 import axios from "axios"
 import React, { useEffect, useMemo, useState } from "react"
 import { useUser } from "../context/userContext"
-import { useNavigate } from "react-router"
+import { useNavigate } from "react-router-dom"
 import ChatCard from "../components/ChatCard"
 import { toast } from "react-toastify"
 import debounce from "../utils/debounce"
@@ -21,7 +21,7 @@ function Chats(){
     useEffect(() => {
         const fetchChats = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:8003/chat`, {withCredentials: true})
+                const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/chat`, {withCredentials: true})
                 setChats(data.data)
 
             } catch (error) {
@@ -35,7 +35,7 @@ function Chats(){
 
     const createChat = async (userId) => {
         try {
-            const { data } = await axios.post(`http://localhost:8003/chat`, {userId}, {withCredentials: true})
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/chat`, {userId}, {withCredentials: true})
             console.log(data)
             navigate(`messages/${data.data._id}`)
         } catch (error) {
@@ -47,7 +47,7 @@ function Chats(){
     const fetchUsers = async (searchStr) => {
 
         try {
-            const { data } = await axios.get(`http://localhost:8003/user/all?search=${searchStr}`)
+            const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/user/all?search=${searchStr}`)
             console.log(data?.data)
             setUsers(data?.data)
 

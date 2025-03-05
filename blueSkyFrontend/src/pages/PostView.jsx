@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import Post from "../components/Post";
 import { toast } from "react-toastify";
 import { ring2 } from 'ldrs'
@@ -18,7 +18,7 @@ function PostView(){
             setLoading(true)
 
             try {
-                const { data } = await axios.get(`http://localhost:8003/post/${postId}`, {withCredentials: true})
+                const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/post/${postId}`, {withCredentials: true})
                 console.log(data)
                 setPost(data.data.post)
                 setPostReplies(data.data.replies)

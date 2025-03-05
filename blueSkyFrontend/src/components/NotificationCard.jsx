@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import PostCard from "./PostCard";
-import usePosts from "../hooks/usePosts";
-import { usePostContext } from "../context/postContext";
-import { useUser } from "../context/userContext";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { Heart, UserRound } from "lucide-react";
 
 function NotificationCard({notification}){
@@ -33,7 +30,7 @@ function NotificationCard({notification}){
                         <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
                     </div> :
 
-                    <img className='h-10 w-10 rounded-full object-cover' src={user?.avatar} alt="" />
+                    <img className='h-10 w-10 rounded-full object-cover' src={notification?.senderUserId?.avatar} alt="" />
                 }
                     <p onClick={(e) => handleUserClick(e, notification?.senderUserId?.username)} className="text-[15px] mt-2"><span className="font-bold hover:underline">{notification?.senderUserId?.fullname?.toUpperCase()}</span> liked your post</p>
                     <p className="text-gray-600 text-[15px] mt-2">{notification?.relatedPostId?.text}</p>

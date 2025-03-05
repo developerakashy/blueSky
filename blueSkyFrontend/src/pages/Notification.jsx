@@ -1,14 +1,9 @@
 import React, { useEffect, useState } from "react";
 import NotificationCard from "../components/NotificationCard";
-import axios from "axios";
-import { useLocation } from "react-router";
+import { useUser } from "../context/userContext";
 
-function Notification({notifications}){
-    const location = useLocation()
-
-    useEffect(() => {
-        console.log(location.pathname)
-    }, [notifications])
+function Notification(){
+    const { notifications } = useUser()
 
     return(
         <div className="w-full pb-186">

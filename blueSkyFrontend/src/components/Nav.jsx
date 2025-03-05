@@ -1,8 +1,8 @@
 import React from 'react'
 import { useUser } from '../context/userContext'
-import { NavLink, useNavigate } from 'react-router'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { usePostContext } from '../context/postContext'
-import { Bell, Bookmark, CircleEllipsis, Cloudy, Ellipsis, Hash, House, MessageCircle, Rainbow, Search, UserRound } from 'lucide-react'
+import { Bell, Bookmark, Cloudy, House, MessageCircle, Search, UserRound } from 'lucide-react'
 
 function Nav(){
     const {user, setPublishPost, logout} = useUser()

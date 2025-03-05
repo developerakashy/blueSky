@@ -1,6 +1,6 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useUser } from '../context/userContext'
 
 function VerifyUser(){
@@ -15,7 +15,7 @@ function VerifyUser(){
 
         const verifyUser = async () => {
             try {
-                const { data } = await axios.post(`http://localhost:8003/user/verify-token`, {token}, {withCredentials: true})
+                const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/verify-token`, {token}, {withCredentials: true})
                 setSuccess(true)
                 setMessage('user verified successfully')
                 return data

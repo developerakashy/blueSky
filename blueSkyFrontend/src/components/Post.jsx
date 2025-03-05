@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useUser } from '../context/userContext'
 import PostCard from './PostCard'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import PostText from './PostText'
 import { Bookmark, Heart, Repeat2, UserRound } from 'lucide-react'
@@ -54,7 +54,7 @@ function Post({post, postReplies, parentPost}){
             setLoading(true)
 
             try {
-                const { data } = await axios.delete(`http://localhost:8003/post/${post?._id}`, {withCredentials: true})
+                const { data } = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/post/${post?._id}`, {withCredentials: true})
 
                 console.log(data)
                 setPostContext(prev => prev.filter(post => post?._id !== data?.data?._id))
@@ -141,6 +141,10 @@ function Post({post, postReplies, parentPost}){
 
     const handelPostReply = (e) => {
         e.stopPropagation()
+        if(!loggedInUser?._id) {
+            toast.error('Log in to reply on post')
+            return
+        }
         setPublishPost({publish: true, setPosts, parentPost: post})
     }
 
@@ -155,6 +159,11 @@ function Post({post, postReplies, parentPost}){
 
     const handlePostLike = (e) => {
         e.stopPropagation()
+        if(!loggedInUser?._id) {
+            toast.error('Log in to like the post')
+            return
+        }
+
         if(likeTimeoutRef.current){
             clearTimeout(likeTimeoutRef.current)
         }
@@ -168,7 +177,7 @@ function Post({post, postReplies, parentPost}){
     useEffect(() => {
         const togglePostLike = async () => {
             try {
-                const { data } = await axios.post(`http://localhost:8003/like/${post._id}`, {}, {withCredentials: true})
+                const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/like/${post._id}`, {}, {withCredentials: true})
 
                 return data?.data?.userIdArray?.length
             } catch (error) {
@@ -189,6 +198,10 @@ function Post({post, postReplies, parentPost}){
 
     const handleBookmark = (e) => {
         e.stopPropagation()
+        if(!loggedInUser?._id) {
+            toast.error('Log in to bookmark the post')
+            return
+        }
 
         if(bookmarkTimeoutRef.current){
             clearTimeout(bookmarkTimeoutRef.current)
@@ -200,7 +213,7 @@ function Post({post, postReplies, parentPost}){
     useEffect(() => {
         const toggleBookmark = async () =>  {
             try {
-                const { data } = await axios.post(`http://localhost:8003/bookmark/${post?._id}`, {}, {withCredentials: true})
+                const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/bookmark/${post?._id}`, {}, {withCredentials: true})
 
                 return data.data?.postIdArray?.indexOf(post?._id) === -1 ? false : true
             } catch (error) {
@@ -221,6 +234,10 @@ function Post({post, postReplies, parentPost}){
 
     const handleRepost = (e) => {
         e.stopPropagation()
+        if(!loggedInUser?._id) {
+            toast.error('Log in to repost the post')
+            return
+        }
 
         if(repostTimeoutRef.current){
             clearTimeout(repostTimeoutRef.current)
@@ -233,7 +250,7 @@ function Post({post, postReplies, parentPost}){
     useEffect(() => {
         const togglePostRepost = async () => {
             try {
-                const { data } = await axios.post(`http://localhost:8003/repost/${post?._id}`, {}, {withCredentials: true})
+                const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/repost/${post?._id}`, {}, {withCredentials: true})
 
                 return data?.data?.repostCount || 0
             } catch (error) {
@@ -262,20 +279,25 @@ function Post({post, postReplies, parentPost}){
                 <p className='text-xl font-semibold'>Post</p>
             </div>
 
+            <div className=''>
+                {parentPost?.length > 0 &&
+                    parentPost.map(parent => <PostCard key={parent?._id} post={parent} parentPost={true}/>)
+                }
+            </div>
 
             <div>
-                <div className='px-4 py-2 flex justify-between'>
+                <div className='px-5 py-2 flex justify-between'>
                     <div className='flex gap-2'>
                         {!user?.avatar ?
-                            <div className='h-11 w-11 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
+                            <div onClick={() => navigate(`/user/${user?.username}`)} className='cursor-pointer h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
                                 <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
                             </div> :
 
-                            <img className='block h-11 w-11 rounded-full object-cover' src={user?.avatar} alt="" />
+                            <img onClick={() => navigate(`/user/${user?.username}`)} className='cursor-pointer block h-10 w-10 rounded-full object-cover' src={user?.avatar} alt="" />
                         }
                         <div>
                             <p onClick={() => navigate(`/user/${user?.username}`)} className='cursor-pointer font-bold'>{user?.fullname?.toUpperCase()}</p>
-                            <p className='text-sm text-slate-500'>@{user?.username?.toLowerCase()}</p>
+                            <p onClick={() => navigate(`/user/${user?.username}`)} className='cursor-pointer text-sm text-slate-500'>@{user?.username?.toLowerCase()}</p>
                         </div>
                     </div>
 
@@ -293,7 +315,7 @@ function Post({post, postReplies, parentPost}){
                 </div>
 
                 <div className='w-full'>
-                <div className="px-4">
+                <div className="px-5">
                     <PostText  text={post?.text}/>
                 </div>
                 {mediaLength > 0 &&
@@ -311,7 +333,7 @@ function Post({post, postReplies, parentPost}){
                 }
                 </div>
 
-                <div className='flex px-4 py-3'>
+                <div className='flex px-5 py-3'>
                     <p className='text-gray-600 self-start'>{formatTime(post?.createdAt)}</p>
                     <p className='self-start text-gray-600 mx-1'>·</p>
                     <p className='text-gray-600 self-start'>{formatDate(post?.createdAt)}</p>
@@ -366,14 +388,14 @@ function Post({post, postReplies, parentPost}){
                 </div>
             </div>
 
-            <div>
+            <div className='pb-130'>
                 {posts && posts.map(reply => reply?._id && <PostCard key={reply._id} post={reply}/>)}
             </div>
         </div>
 
         {previewImage &&
         <div className="z-30 fixed right-0 top-0 bottom-0 w-screen h-screen backdrop-blur bg-black/90 flex flex-col items-center justify-center">
-            <button className="fixed top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
+            <button className="cursor-pointer fixed top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
             <div className="h-[95%] flex items-center">
                 <img className="min-h-[600px] max-h-full object-contain" src={imageUrl[currentIndex]} alt="" />
             </div>
@@ -387,7 +409,7 @@ function Post({post, postReplies, parentPost}){
 
         {previewVideo &&
         <div className="z-30 fixed right-0 top-0 w-screen h-screen backdrop-blur bg-black/90 flex flex-col items-center justify-center">
-            <button className="fixed z-40 top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
+            <button className="cursor-pointer fixed z-40 top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
             <div className="h-[95%] flex items-center object-contain">
                 <video className="max-h-full min-w-[600px]" src={imageUrl[currentIndex]} controls>
                     <source src={imageUrl[currentIndex]}/>

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router"
+import { useNavigate } from "react-router-dom"
 
 function PostText({text}){
     const navigate = useNavigate()
@@ -10,7 +10,7 @@ function PostText({text}){
 
     const renderText = (text) => {
         return text?.split(/(@[\w.-]{1,15})/g).map((part, index) => {
-           
+
             if(part.startsWith('@')){
                 const username = part.slice(1)
 
@@ -30,7 +30,7 @@ function PostText({text}){
     }
 
     return(
-        <p className="text-gray-800">
+        <p className="">
             {renderText(text)}
         </p>
     )

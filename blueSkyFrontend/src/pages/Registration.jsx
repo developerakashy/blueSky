@@ -4,7 +4,7 @@ import 'ldrs/dotPulse'
 import { ToastContainer, toast } from 'react-toastify'
 import debounce from '../utils/debounce'
 import axios from "axios";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/userContext";
 
 function Registration(){
@@ -120,7 +120,7 @@ function Registration(){
         const reqBody = username ? {username} : {email}
 
         try {
-            const { data } = await axios.post(`http://localhost:8003/user/exist`, reqBody)
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/exist`, reqBody)
             console.log(data.data)
             username ? setIsUsernameAvailable(data?.data?.available) : setEmailExist(data?.data?.exist)
 
@@ -201,7 +201,7 @@ function Registration(){
     const createUser = async () => {
         setLoading(true)
         try {
-            const { data } = await axios.post(`http://localhost:8003/user/register`, {
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/register`, {
                 fullname: `${formData?.firstName} ${formData?.lastName}`,
                 email: formData?.email,
                 username: formData?.username,
