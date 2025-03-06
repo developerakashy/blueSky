@@ -17,6 +17,7 @@ const publishPost = asyncHandler(async (req, res) => {
     const { text, parentPostId } = req.body
     const { mediaFiles = [] } = req.files
 
+    console.log("MediaFile during upload: ", mediaFiles)
     let parentPostInfo
     const publicIds = []
     const mediaFileUrls =  []
@@ -156,6 +157,7 @@ const publishPost = asyncHandler(async (req, res) => {
             fs.unlinkSync(file?.path)
         }
 
+        console.error("Upload error: ", error);
         throw new ApiError(400, error?.message || 'something went wrong while publishing post')
     }
 
