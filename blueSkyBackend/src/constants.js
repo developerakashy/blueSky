@@ -6,8 +6,8 @@ const DB_NAME = 'blueSky'
 const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
-    maxAge: 24 * 60 * 60 * 1000,
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
 }
 
+console.log(options)
 export { DB_NAME, options }
