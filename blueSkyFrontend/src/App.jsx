@@ -6,6 +6,8 @@ import { RouterProvider } from 'react-router-dom'
 import axios from 'axios'
 import router from './router'
 import { FollowingPostContextProvider } from './context/followingPost'
+import { mirage } from 'ldrs'
+mirage.register()
 
 function App() {
   const [loading, setLoading] = useState(false)
