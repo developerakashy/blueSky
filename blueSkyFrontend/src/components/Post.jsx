@@ -274,7 +274,7 @@ function Post({post, postReplies, parentPost}){
     return(
     <>
         <div className='w-full'>
-            <div className='sticky overflow-x-hidden top-0 bg-white z-30 flex items-center p-2 gap-4'>
+            <div className='sticky top-0 border-r border-slate-200 bg-white/70 backdrop-blur-sm z-30 flex items-center py-2 px-1 gap-4'>
                 <button onClick={() => navigate(-1)} className='cursor-pointer p-2 backdrop-blur-md hover:bg-black/10 rounded-full ml-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
                 <p className='text-xl font-semibold'>Post</p>
             </div>

@@ -154,7 +154,7 @@ function Profile(){
     return(
         <div className="w-full">
             {edit && <EditProfile setEdit={setEdit} user={user} setUser={setUser}/>}
-            <div className='sticky bg-white z-20 p-2 top-0 flex w-full items-center gap-4'>
+            <div className='sticky bg-white/70 border-r border-slate-200 backdrop-blur-sm z-20 p-2 top-0 flex w-full items-center gap-4'>
                 <button onClick={() => navigate(-1)} className='cursor-pointer p-2 backdrop-blur-md hover:bg-black/10 rounded-full ml-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
                 <div className="">
                     <p className='font-semibold'>{user?.fullname?.toUpperCase()}</p>
@@ -202,7 +202,7 @@ function Profile(){
 
             </div>
 
-            <div className="border-b border-slate-200 mt-3 flex sticky top-15 z-30 bg-white">
+            <div className="border-b backdrop-blur-sm border-slate-200 bg-white/70 border-r mt-3 flex sticky top-15 z-30">
                 <button onClick={() => navigate(`/user/${username}`)} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'posts' ? 'text-black' : 'text-gray-500'}`}>Posts</button>
                 <button onClick={() => navigate(`/user/${username}/replies`)} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'replies' ? 'text-black' : 'text-gray-500'}`}>Replies</button>
                 <button onClick={() => navigate(`/user/${username}/likes`)} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'likes' ? 'text-black' : 'text-gray-500'}`}>Likes</button>

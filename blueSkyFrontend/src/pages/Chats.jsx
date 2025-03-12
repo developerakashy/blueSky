@@ -82,10 +82,9 @@ function Chats(){
     return(
         <div className="relative w-full">
         <div className="w-full pb-186">
-            <div className="flex z-20 justify-between items-center p-4 border-b border-slate-200 bg-white">
+            <div className="flex z-10 sticky top-0 bg-white/70 backdrop-blur-sm justify-between items-center py-3 px-4 border-b border-slate-200">
                 <p className="text-xl font-bold">Chats</p>
-
-                <button onClick={() => setNewChat(true)} className="cursor-pointer block flex items-center bg-blue-500 text-white px-4 py-2 rounded-xl gap-2">New chat</button>
+                <button onClick={() => setNewChat(true)} className="cursor-pointer block flex items-center bg-blue-500 text-white px-3 py-1 rounded-xl gap-2">New chat</button>
             </div>
 
             {chats && chats.map(chat => {
@@ -99,7 +98,7 @@ function Chats(){
         </div>
 
         {newChat &&
-            <div className="absolute top-0 backdrop-blur-xs h-full  w-full h-12 flex flex-col items-center">
+            <div className="absolute z-20 top-0 backdrop-blur-xs h-full  w-full h-12 flex flex-col items-center">
                 <X strokeWidth={2.5} onClick={() => setNewChat(false)} className="cursor-pointer absolute left-3 top-3 p-1 rounded-full stroke-slate-700 bg-black stroke-white hover:bg-red-500 h-6 w-6"/>
                 <div className="mt-12 border border-slate-200 rounded-full bg-white w-[75%] py-4 px-6">
                     <input

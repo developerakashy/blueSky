@@ -295,7 +295,7 @@ function PostCard({post, repliedTo, parentPost}){
                         <button onClick={(e) => handleDropDown(e)} className='cursor-pointer'>⋯</button>
                         {postMenu  &&
                         <div  className="absolute flex flex-col bg-white top-7 border-[1px] rounded-xl w-40 overflow-hidden">
-                            <button onClick={(e) => handlePostDelete(e)} className="cursor-pointer text-nowrap w-full py-1 border-b-[1px] text-red-500 hover:bg-red-50">Delete</button>
+                            <button onClick={(e) => handlePostDelete(e)} className="cursor-pointer z-40 text-nowrap w-full py-1 border-b-[1px] text-red-500 hover:bg-red-50">Delete</button>
                         </div>
                         }
                     </div>}

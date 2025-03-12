@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../context/userContext";
 import formatDate from "../utils/formatDate";
 import formatTime from "../utils/formatTime";
@@ -8,6 +8,7 @@ import { UserRound } from "lucide-react";
 
 
 function ChatMessages(){
+    const navigate = useNavigate()
     const { chatId } = useParams()
     const {user, setMessages, messages} = useUser()
     const [receiver, setReceiver] = useState({})
@@ -67,7 +68,10 @@ function ChatMessages(){
     return(
         <div className="relative h-screen max-h-screen">
 
-            <div className="flex gap-2 border-b border-slate-200 px-4 py-2 w-full bg-white max-h-[10%]">
+            <div className="flex gap-2 border-b border-slate-200 px-2 py-2 w-full bg-white max-h-[10%]">
+                <div className="flex items-center justify-center">
+                    <button onClick={() => navigate(-1)} className='cursor-pointer p-2 w-max backdrop-blur-md hover:bg-black/10 rounded-full rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
+                </div>
                 <div className="min-w-12">
                     {!receiver?.avatar ?
                         <div className='h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
