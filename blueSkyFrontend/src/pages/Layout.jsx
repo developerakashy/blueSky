@@ -25,11 +25,11 @@ function Layout(){
                 />
             }
 
-            <div className='hidden md:flex sticky top-0 h-screen w-full justify-end max-w-[450px]'>
+            <div className='md:flex md:sticky md:top-0 md:h-screen md:w-full md:justify-end md:max-w-[450px]'>
                 <Nav/>
             </div>
 
-            <div className='sm:min-w-[650px] w-full max-w-[650px] border-x-1 border-slate-200'>
+            <div className='sm:min-w-[650px] w-full max-w-[650px] border-x border-slate-200'>
                 <Outlet/>
             </div>
 

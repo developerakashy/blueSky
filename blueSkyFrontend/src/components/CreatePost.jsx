@@ -108,13 +108,13 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
             }
 
             {user?.isVerified &&
-                <div className="bg-white max-h-[80%] overflow-hidden overflow-y-auto
+                <div className="bg-white max-h-[80%] max-w-[90%] overflow-hidden overflow-y-auto
                 [&::-webkit-scrollbar]:w-2
                 [&::-webkit-scrollbar-track]:rounded-full
                 [&::-webkit-scrollbar-thumb]:rounded-full
                 [&::-webkit-scrollbar-track]:bg-gray-100
                 [&::-webkit-scrollbar-thumb]:bg-gray-400
-                h-min relative mt-12 pt-14 rounded-xl max-w-[620px]">
+                h-min relative mt-12 pt-14 rounded-xl sm:max-w-[620px]">
                 <X strokeWidth={2.5} onClick={() => setPublishPost({publish: false})} className="cursor-pointer absolute left-3 top-3 p-1 rounded-full stroke-slate-700 hover:bg-slate-300 h-6 w-6"/>
                 {/* <button className="cursor-pointer  bg-white border-slate-300 rounded-full hover:bg-slate-300" onClick={() => setPublishPost({publish: false})}><img className="h-5 w-5 p-1 rounded-full" src="../../cross.png"/></button> */}
                 {parentPost &&
@@ -130,7 +130,7 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                         <div className="h-full pb-3 border border-slate-300"></div>
                     </div>
 
-                    <div className=''>
+                    <div className='max-w-[80%]'>
                         <div className='flex justify-between'>
                             <div className='flex'>
                                 <p className="text-sm self-start font-semibold">{parentPost?.userId?.fullname?.toUpperCase()}</p>
@@ -141,11 +141,11 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                             </div>
                         </div>
 
-                        <div className="w-full text-ellipsis line-clamp-5">
-                            <p className='max-w-[560px] tracking-normal leading-tight text-[15px]'>{parentPost?.text}</p>
+                        <div className="max-w-full text-ellipsis line-clamp-5">
+                            <p className='max-w-full tracking-normal leading-tight text-[15px]'>{parentPost?.text}</p>
                             {parentPost?.mediaFiles &&
                                 <div className="mt-2">
-                                {parentPost?.mediaFiles.map(url => <p key={url} className="max-w-[500px] text-ellipsis overflow-hidden">{url}</p>)}
+                                {parentPost?.mediaFiles.map(url => <p key={url} className="max-w-full text-ellipsis overflow-hidden">{url}</p>)}
                                 </div>
                             }
                         </div>
@@ -166,11 +166,11 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                 }
                 <div className="bg-white mx-4 flex items-start gap-2 mb-4 relative">
                     {!user?.avatar ?
-                        <div className='h-10 w-10 mx-1 bg-slate-200 flex justify-center items-center rounded-full object-cover'>
+                        <div className='min-h-10 min-w-10 mx-1 bg-slate-200 flex justify-center items-center rounded-full object-cover'>
                             <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
                         </div> :
 
-                        <img className='h-10 w-10 mx-1 rounded-full object-cover' src={user?.avatar} alt="" />
+                        <img className='min-h-10 max-h-10 min-w-10 max-w-10 mx-1 rounded-full object-cover' src={user?.avatar} alt="" />
                     }
                     <div className="w-[512px] flex flex-col gap-2">
 

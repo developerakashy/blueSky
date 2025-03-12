@@ -117,9 +117,9 @@ function PostCard({post, repliedTo, parentPost}){
 
         switch(mediaLength){
             case 1: return `grid-cols-1 grid-rows-1 max-h-[516px] ${mediaType === 'video' ? 'w-full' : 'w-fit'}`;
-            case 2: return 'grid-cols-2 grid-rows-1 h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px]';
-            case 3: return 'grid-cols-2 grid-rows-2 h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px]';
-            case 4: return 'grid-cols-2 grid-rows-2 h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px]';
+            case 2: return 'grid-cols-2 grid-rows-1 min-h-48 max-h-56 sm:min-h-72 sm:max-h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px]';
+            case 3: return 'grid-cols-2 grid-rows-2 min-h-48 max-h-56 sm:min-h-72 sm:max-h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px]';
+            case 4: return 'grid-cols-2 grid-rows-2 min-h-48 max-h-56 sm:min-h-72 sm:max-h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px]';
             default: return ''
         }
     }
@@ -263,18 +263,18 @@ function PostCard({post, repliedTo, parentPost}){
 
     return(
         <>
-        <div onClick={() => navigate(`/post/${post?._id}`)} className={`cursor-pointer hover:bg-slate-50 ${parentPost ? '' : 'border-b'} border-slate-200 px-5 flex gap-2`}>
+        <div onClick={() => navigate(`/post/${post?._id}`)} className={`cursor-pointer hover:bg-slate-50 ${parentPost ? '' : 'border-b'} border-slate-200 px-2 flex gap-2`}>
             <div className={`w-12 flex flex-col items-center ${(parentPost && post?.parentPost) ? '' : 'pt-3'}`}>
                 {(parentPost && post?.parentPost) &&
                     <div className="border h-3 border-slate-300"></div>
                 }
 
                 {!user?.avatar ?
-                    <div onClick={(e) => redirectUserProfile(e)} className='min-h-10 max-h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
+                    <div onClick={(e) => redirectUserProfile(e)} className='min-h-10 max-h-10 min-w-10 max-w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
                         <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
                     </div> :
 
-                    <img onClick={(e) => redirectUserProfile(e)} className='min-h-10 max-h-10 w-10 rounded-full object-cover' src={user?.avatar} alt="" />
+                    <img onClick={(e) => redirectUserProfile(e)} className='min-h-10 max-h-10 min-w-10 max-w-10 rounded-full object-cover' src={user?.avatar} alt="" />
                 }
 
                 {(parentPost) &&
@@ -325,32 +325,32 @@ function PostCard({post, repliedTo, parentPost}){
                 </div>
 
                 <div className='flex justify-between ml-[-8px]'>
-                    <button onClick={(e) => handelPostReply(e)} className='min-w-12 group cursor-pointer flex items-end text-sm text-gray-500'>
+                    <button onClick={(e) => handelPostReply(e)} className='min-w-12 group cursor-pointer flex items-center text-xs text-gray-500'>
                         <div className="p-2 group-hover:bg-blue-100/60 rounded-full ">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 fill-gray-500 group-hover:fill-blue-500`}>
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 fill-gray-500 group-hover:fill-blue-500`}>
                                 <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0-.21,1.09A1,1,0,0,0,3,22h9A10,10,0,0,0,12,2Zm0,18H5.41l.93-.93a1,1,0,0,0,0-1.41A8,8,0,1,1,12,20Z"/>
                             </svg>
                         </div>
-                        <p className="pb-1.5 font-medium group-hover:text-blue-500 ml-[-5px] brder">{postReplyCount}</p>
+                        <p className="mt-1 font-medium group-hover:text-blue-500 ml-[-5px] brder">{postReplyCount}</p>
                     </button>
 
-                    <button onClick={(e) => handleRepost(e)} className='min-w-12 group cursor-pointer flex items-end text-sm text-gray-500'>
+                    <button onClick={(e) => handleRepost(e)} className='min-w-12 group cursor-pointer flex items-center text-xs text-gray-500'>
                         <div className="p-2 group-hover:bg-green-100/60 transition-colors duration-200 rounded-full">
-                            <Repeat2 strokeWidth={2} className={`h-5 w-5 stroke-gray-500 group-hover:stroke-green-500 ${postReposted ? 'stroke-green-500': ''}`}/>
+                            <Repeat2 strokeWidth={2} className={`h-4.5 w-4.5 stroke-gray-500 group-hover:stroke-green-500 ${postReposted ? 'stroke-green-500': ''}`}/>
                         </div>
-                        <p className={`pb-1.5 font-medium group-hover:text-green-500 ml-[-5px] ${postReposted ? 'text-green-500': ''}`}>{postRepostCount}</p>
+                        <p className={`mt-1 font-medium group-hover:text-green-500 ml-[-5px] ${postReposted ? 'text-green-500': ''}`}>{postRepostCount}</p>
                     </button>
 
-                    <button onClick={(e) => handlePostLike(e)} className='min-w-12 group cursor-pointer flex items-end text-sm text-gray-500'>
+                    <button onClick={(e) => handlePostLike(e)} className='min-w-12 group cursor-pointer flex items-center text-xs text-gray-500'>
                     <div className="p-2 group-hover:bg-red-100/60 transition-colors duration-200 rounded-full">
-                        <Heart strokeWidth={2} className={`h-4.5 w-4.5 stroke-gray-500 group-hover:stroke-red-400 ${postLiked ? 'fill-red-400 stroke-red-400' : ''}`}/>
+                        <Heart strokeWidth={2} className={`h-4 w-4 stroke-gray-500 group-hover:stroke-red-400 ${postLiked ? 'fill-red-400 stroke-red-400' : ''}`}/>
                     </div>
-                    <p className={`pb-1.5 font-medium group-hover:text-red-400 ml-[-5px] ${postLiked ? 'text-red-400' : ''}`}>{postLikeCount}</p>
+                    <p className={`mt-1 font-medium group-hover:text-red-400 ml-[-5px] ${postLiked ? 'text-red-400' : ''}`}>{postLikeCount}</p>
                     </button>
 
                     <button onClick={(e) => handleBookmark(e)} className='min-w-12 group cursor-pointer flex justify-end items-end'>
                         <div className="p-2 group-hover:bg-blue-100/60 rounded-full">
-                            <Bookmark strokeWidth={2} className={`h-4.5 w-4.5  group-hover:stroke-blue-500 ${postBookmarked ? 'fill-blue-500 stroke-blue-500' : 'stroke-gray-500'}`}/>
+                            <Bookmark strokeWidth={2} className={`h-4 w-4  group-hover:stroke-blue-500 ${postBookmarked ? 'fill-blue-500 stroke-blue-500' : 'stroke-gray-500'}`}/>
                         </div>
                     </button>
                 </div>

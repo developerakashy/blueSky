@@ -9,6 +9,7 @@ import { Image, UserRound } from "lucide-react";
 import { toast } from "react-toastify";
 import { ring2 } from "ldrs";
 import { useLocation } from "react-router-dom";
+import formatDate from "../utils/formatDate";
 
 function Profile(){
     const { user: userLoggedIn } = useUser()
@@ -45,7 +46,7 @@ function Profile(){
                         <div key={post?._id}>
                             {(length > 1) && <PostCard post={post?.parentPost?.[0]} parentPost={true}/>}
                             {(length > 2) &&
-                                <div onClick={() => navigate(`/post/${post?.parentPost?.[0]?._id}`)} className="cursor-pointer hover:bg-slate-50 px-5 h-12 flex items-center">
+                                <div onClick={() => navigate(`/post/${post?.parentPost?.[0]?._id}`)} className="cursor-pointer hover:bg-slate-50 px-2 h-12 flex items-center">
                                     <div className="w-11 h-full flex justify-center">
                                         <div className="h-full border border-dashed border-slate-300"></div>
                                     </div>
@@ -190,11 +191,11 @@ function Profile(){
                     <p className="font-bold text-2xl">{user?.fullname?.toUpperCase()}</p>
                     <p className="text-gray-500 text-lg leading-tight">@{user?.username}</p>
                     <p className="mt-2 leading-tight text-[15px]">{user?.about}</p>
-                    <p className="text-gray-500 mt-2 text-[15px]">Joined October 2023</p>
+                    <p className="text-gray-500 mt-2 text-[15px]">Joined {formatDate(user?.createdAt, 'long')}</p>
 
                     <div className="mt-2 flex gap-4">
-                        <button onClick={() => navigate('followers')} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{followerCount || 0}</span> Followers</button>
-                        <button onClick={() => navigate('followings')} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{user?.followingCount || 0}</span> Followings</button>
+                        <button onClick={() => navigate(`/user/${username}/followers`)} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{followerCount || 0}</span> Followers</button>
+                        <button onClick={() => navigate(`/user/${username}/followings`)} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{user?.followingCount || 0}</span> Followings</button>
                     </div>
 
                 </div>

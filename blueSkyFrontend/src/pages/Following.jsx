@@ -59,7 +59,7 @@ function FollowingsAndFollowers(){
         <div className="w-full">
             <div className='sticky z-10 top-0 bg-white'>
                 <div className="flex items-center p-2">
-                    <button onClick={() => navigate(-1)} className='px-4 rounded-full mr-6'><img className='h-4' src="../../.././back.png" alt="" /></button>
+                    <button onClick={() => navigate(-1)} className='px-4 rounded-full mr-6'><img className='cursor-pointer h-4' src="../../.././back.png" alt="" /></button>
                     <div>
                         <p className='font-semibold'>{user?.fullname?.toUpperCase()}</p>
                         <p className="text-sm text-gray-500">@{user?.username}</p>

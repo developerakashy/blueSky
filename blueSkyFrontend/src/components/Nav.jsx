@@ -10,74 +10,74 @@ function Nav(){
     const {setPosts} = usePostContext()
 
     return(
-        <div className='h-full flex flex-col justify-between w-full max-w-[310px] mr-2'>
-            <div className='mt-6'>
-                <button onClick={() => navigate('/')} className='cursor-pointer px-5 mb-4'>
+        <div className='md:h-full md:flex md:flex-col md:justify-between md:w-full md:max-w-[310px] md:mr-2'>
+            <div className='fixed py-2 flex justify-between bottom-0 left-0 right-0 bg-white z-20 md:py-auto md:block md:relative md:mt-6'>
+                <button onClick={() => navigate('/')} className='hidden md:block md:cursor-pointer md:px-5 md:mb-4'>
                     {/* <Hash strokeWidth='1.5' className='h-8 w-8'/> */}
                     <Cloudy strokeWidth='2' className='h-8 w-8 fill-blue-400 stroke-blue-500'/>
                 </button>
 
-                <button className='cursor-pointer group w-full px-2'>
+                <button className='cursor-pointer group md:w-full md:block flex justify-center items-center max-w-16 min-w-14'>
                     <NavLink
                     preventScrollReset
                     to='/'>
                         {({isActive}) =>
-                            <div className='flex items-center gap-2 px-4 py-4 pr-12 w-min rounded-full group-hover:bg-slate-100'>
+                            <div className='flex items-center gap-2 p-2 md:p-4 md:pr-12 w-min rounded-full group-hover:bg-slate-100'>
                                 <House className={`${isActive ? 'stroke-3' : ''}`}/>
-                                <p className={`text-xl ${isActive ? 'font-bold' : ''}`}>Home</p>
+                                <p className={`hidden md:block text-xl ${isActive ? 'font-bold' : ''}`}>Home</p>
                             </div>
                         }
                     </NavLink>
                 </button>
 
-                <button className='cursor-pointer group w-full px-2'>
+                <button className='cursor-pointer group md:w-full md:block flex justify-center items-center max-w-16 min-w-14'>
                     <NavLink
                     preventScrollReset
                     to='/explore'>
                         {({isActive}) =>
-                            <div className='flex items-center gap-2 px-4 py-4 pr-12 w-min rounded-full group-hover:bg-slate-100'>
+                            <div className='flex items-center gap-2 p-2 md:p-4 md:pr-12 w-min rounded-full group-hover:bg-slate-100'>
                                 <Search className={`${isActive ? 'stroke-3' : ''}`}/>
-                                <p className={`text-xl ${isActive ? 'font-bold' : ''}`}>Explore</p>
+                                <p className={`hidden md:block text-xl ${isActive ? 'font-bold' : ''}`}>Explore</p>
                             </div>
                         }
                     </NavLink>
                 </button>
-                <button  className='cursor-pointer group w-full px-2'>
+                <button  className='cursor-pointer group md:w-full md:block flex justify-center items-center max-w-16 min-w-14'>
                     <NavLink to='/notifications'>
                         {({isActive}) =>
-                            <div className='flex items-center gap-2 px-4 py-4 pr-12 w-min rounded-full group-hover:bg-slate-100'>
+                            <div className='flex items-center gap-2 p-2 md:p-4 md:pr-12 w-min rounded-full group-hover:bg-slate-100'>
                                 <Bell className={`${isActive ? 'stroke-3' : ''}`}/>
-                                <p className={`text-xl ${isActive ? 'font-bold' : ''}`}>Notifications</p>
+                                <p className={`hidden md:block text-xl ${isActive ? 'font-bold' : ''}`}>Notifications</p>
                             </div>
                         }
                     </NavLink>
                 </button>
-                <button className='cursor-pointer group w-full px-2'>
+                <button className='cursor-pointer group md:w-full md:block flex justify-center items-center max-w-16 min-w-14'>
                     <NavLink to='/chat'>
                         {({isActive}) =>
-                            <div className='flex items-center gap-2 px-4 py-4 pr-12 w-min rounded-full group-hover:bg-slate-100'>
+                            <div className='flex items-center gap-2 p-2 md:p-4 md:pr-12 w-min rounded-full group-hover:bg-slate-100'>
                                 <MessageCircle className={`${isActive ? 'stroke-3' : ''}`}/>
-                                <p className={`text-xl ${isActive ? 'font-bold' : ''}`}>Chats</p>
+                                <p className={`hidden md:block text-xl ${isActive ? 'font-bold' : ''}`}>Chats</p>
                             </div>
                         }
                     </NavLink>
                 </button>
-                <button className='cursor-pointer group w-full px-2'>
+                <button className='cursor-pointer group md:w-full md:block flex justify-center items-center max-w-16 min-w-14'>
                     <NavLink to={`/user/${user?.username}`}>
                         {({isActive}) =>
-                            <div className='flex items-center gap-2 px-4 py-4 pr-12 w-min rounded-full group-hover:bg-slate-100'>
+                            <div className='flex items-center gap-2 p-2 md:p-4 md:pr-12 w-min rounded-full group-hover:bg-slate-100'>
                                 <UserRound className={`${isActive ? 'stroke-3' : ''}`}/>
-                                <p className={`text-xl ${isActive ? 'font-bold' : ''}`}>Profile</p>
+                                <p className={`hidden md:block text-xl ${isActive ? 'font-bold' : ''}`}>Profile</p>
                             </div>
                         }
                     </NavLink>
                 </button>
-                <button className='cursor-pointer group w-full px-2'>
+                <button className='cursor-pointer group md:w-full md:block flex justify-center items-center max-w-16 min-w-14'>
                     <NavLink to='/bookmarks'>
                         {({isActive}) =>
-                            <div className='flex items-center gap-2 px-4 py-4 pr-12 w-min rounded-full group-hover:bg-slate-100'>
+                            <div className='flex items-center gap-2 p-2 md:p-4 md:pr-12 w-min rounded-full group-hover:bg-slate-100'>
                                 <Bookmark className={`${isActive ? 'stroke-3' : ''}`}/>
-                                <p className={`text-xl ${isActive ? 'font-bold' : ''}`}>Bookmarks</p>
+                                <p className={`hidden md:block text-xl ${isActive ? 'font-bold' : ''}`}>Bookmarks</p>
                             </div>
                         }
                     </NavLink>
@@ -92,14 +92,14 @@ function Nav(){
                         }
                     </NavLink>
                 </button> */}
-                <div className='px-2 py-2 '>
+                <div className='hidden md:block px-2 py-2 '>
                     <button onClick={() => setPublishPost({publish: true, setPosts})} className='cursor-pointer w-full text-xl font-semibold text-white bg-blue-600 px-2 py-3 rounded-full'>Post</button>
                 </div>
             </div>
 
 
             {user?.username &&
-            <div className='py-2 px-2 mx-2 rounded-full hover:bg-slate-100 mb-4 flex justify-between items-center'>
+            <div className='hidden py-2 px-2 mx-2 rounded-full hover:bg-slate-100 mb-4 md:flex justify-between items-center'>
 
                 <div className='flex items-center'>
                     {!user?.avatar ?

@@ -1,13 +1,24 @@
-import multer from "multer"
+import multer from 'multer'; // Multer is a middleware for handling file uploads
+import path from 'path'; // Path module for working with file and directory paths
 
+// Configure storage for file uploads
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, './public/temp/')
-    },
-    filename: function (req, file, cb) {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      cb(null, file.originalname + '-' + uniqueSuffix)
-    }
-})
+  // Set the destination folder where uploaded files will be stored
+  destination: (req, file, cb) => {
+    cb(null, path.resolve("./public/temp")); // Store files in the './public/temp' directory
+  },
+  // Set the filename format for uploaded files
+  filename: (req, file, cb) => {
+    // Create a unique file name using the current timestamp and the original file name
+    const filename = `${Date.now()}-${file.originalname}`;
+    cb(null, filename); // Pass the unique filename to the callback
+  }
+});
 
-export const upload = multer({ storage })
+// Initialize the multer upload middleware with the storage configuration
+const upload = multer({
+  storage: storage // Use the defined storage configuration
+});
+
+// Export the upload middleware for use in other modules
+export { upload };

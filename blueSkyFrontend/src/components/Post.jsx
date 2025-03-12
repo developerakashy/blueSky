@@ -131,10 +131,10 @@ function Post({post, postReplies, parentPost}){
         }
 
         switch(mediaLength){
-            case 1: return `grid-cols-1 grid-rows-1 max-h-[516px] ${mediaType === 'video' ? 'w-full px-4' : 'w-fit mx-4'}`;
-            case 2: return 'grid-cols-2 grid-rows-1 h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px] mx-4';
-            case 3: return 'grid-cols-2 grid-rows-2 h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px] mx-4';
-            case 4: return 'grid-cols-2 grid-rows-2 h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px] mx-4';
+            case 1: return `grid-cols-1 grid-rows-1 max-h-[516px] ${mediaType === 'video' ? 'w-full px-2' : 'w-fit mx-2'}`;
+            case 2: return 'grid-cols-2 grid-rows-1 min-h-56 max-h-56 sm:h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px] mx-2';
+            case 3: return 'grid-cols-2 grid-rows-2 min-h-56 max-h-56 sm:h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px] mx-2';
+            case 4: return 'grid-cols-2 grid-rows-2 min-h-56 max-h-56 sm:h-72 border-[1px] rounded-2xl overflow-hidden border-gray-300 gap-[1px] mx-2';
             default: return ''
         }
     }
@@ -263,7 +263,7 @@ function Post({post, postReplies, parentPost}){
                 const repostCount = await togglePostRepost()
                 wasPostRepostedRef.current = postReposted
                 setPostRepostCount(repostCount)
-                console.log('request send')
+                console.log('request sent')
             }
 
         }, 700)
@@ -274,7 +274,7 @@ function Post({post, postReplies, parentPost}){
     return(
     <>
         <div className='w-full'>
-            <div className='sticky top-0 bg-white flex items-center p-2 gap-4'>
+            <div className='sticky overflow-x-hidden top-0 bg-white z-30 flex items-center p-2 gap-4'>
                 <button onClick={() => navigate(-1)} className='cursor-pointer p-2 backdrop-blur-md hover:bg-black/10 rounded-full ml-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
                 <p className='text-xl font-semibold'>Post</p>
             </div>
@@ -286,7 +286,7 @@ function Post({post, postReplies, parentPost}){
             </div>
 
             <div>
-                <div className='px-5 py-2 flex justify-between'>
+                <div className='px-2 py-2 flex justify-between'>
                     <div className='flex gap-2'>
                         {!user?.avatar ?
                             <div onClick={() => navigate(`/user/${user?.username}`)} className='cursor-pointer h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
@@ -315,15 +315,15 @@ function Post({post, postReplies, parentPost}){
                 </div>
 
                 <div className='w-full'>
-                <div className="px-5">
+                <div className="px-2">
                     <PostText  text={post?.text}/>
                 </div>
                 {mediaLength > 0 &&
                     <div className={`cursor-pointer grid ${mediaGallery()} mt-2`}>
                         {imageUrl && imageUrl.map((url, index) =>
                             url.split('/')[4] === 'image' ?
-                            <img key={url} onClick={(e) => handleMediaPreview(e, index)} className={`${mediaLength === 3 && index === 0 && 'row-span-2'} ${mediaLength > 1 ? 'w-full' : 'w-fit rounded-2xl border-[1px]'} h-full object-cover`} src={url} alt="Image file" /> :
-                            <video key={url} onClick={(e) => handleMediaPreview(e, index)} className={`${mediaLength === 3 && index === 0 && 'row-span-2'} ${mediaLength > 1 ? 'w-full' : 'w-fit rounded-2xl border-[1px]'} h-full w-full bg-black`}  controls>
+                            <img key={url} onClick={(e) => handleMediaPreview(e, index)} className={`${mediaLength === 3 && index === 0 && 'row-span-2'} ${mediaLength > 1 ? 'w-full' : 'w-fit rounded-2xl border border-slate-200'} h-full object-cover`} src={url} alt="Image file" /> :
+                            <video key={url} onClick={(e) => handleMediaPreview(e, index)} className={`${mediaLength === 3 && index === 0 && 'row-span-2'} ${mediaLength > 1 ? 'w-full' : 'w-fit rounded-2xl border border-slate-200'} h-full w-full bg-black`}  controls>
                                 <source src={url} alt='video'/>
                             </video>
                         )}
@@ -333,7 +333,7 @@ function Post({post, postReplies, parentPost}){
                 }
                 </div>
 
-                <div className='flex px-5 py-3'>
+                <div className='flex px-2 py-3 text-sm'>
                     <p className='text-gray-600 self-start'>{formatTime(post?.createdAt)}</p>
                     <p className='self-start text-gray-600 mx-1'>·</p>
                     <p className='text-gray-600 self-start'>{formatDate(post?.createdAt)}</p>
@@ -341,33 +341,33 @@ function Post({post, postReplies, parentPost}){
                     <p className='text-gray-600 self-start'>55.k views</p> */}
                 </div>
 
-                <div className='flex justify-between mx-4 py-1 border-y border-slate-200'>
-                    <button onClick={(e) => handelPostReply(e)} className='min-w-12 group cursor-pointer flex items-end text-gray-500'>
+                <div className='flex justify-between mx-2 py-1 border-y border-slate-200 text-sm'>
+                    <button onClick={(e) => handelPostReply(e)} className='min-w-12 group cursor-pointer flex items-center text-gray-500'>
                         <div className="p-2 group-hover:bg-blue-100/60 rounded-full ">
-                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className={`h-5.5 w-5.5 fill-gray-500 group-hover:fill-blue-500`}>
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className={`h-4.5 w-4.5 fill-gray-500 group-hover:fill-blue-500`}>
                                 <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0-.21,1.09A1,1,0,0,0,3,22h9A10,10,0,0,0,12,2Zm0,18H5.41l.93-.93a1,1,0,0,0,0-1.41A8,8,0,1,1,12,20Z"/>
                             </svg>
                         </div>
-                        <p className="pb-1.5 font-medium group-hover:text-blue-500 ml-[-5px] brder">{postReplyCount}</p>
+                        <p className="pt-1 font-medium group-hover:text-blue-500 ml-[-5px] brder">{postReplyCount}</p>
                     </button>
 
-                    <button onClick={(e) => handleRepost(e)} className='min-w-12 group cursor-pointer flex items-end text-gray-500'>
+                    <button onClick={(e) => handleRepost(e)} className='min-w-12 group cursor-pointer flex items-center text-gray-500'>
                         <div className="p-2 group-hover:bg-green-100/60 transition-colors duration-200 rounded-full">
-                            <Repeat2 strokeWidth={2} className={`h-6 w-6 stroke-gray-500 group-hover:stroke-green-500 ${postReposted ? 'stroke-green-500': ''}`}/>
+                            <Repeat2 strokeWidth={2} className={`h-5 w-5 stroke-gray-500 group-hover:stroke-green-500 ${postReposted ? 'stroke-green-500': ''}`}/>
                         </div>
-                        <p className={`pb-1.5 font-medium group-hover:text-green-500 ml-[-5px] ${postReposted ? 'text-green-500': ''}`}>{postRepostCount}</p>
+                        <p className={`pt-1 font-medium group-hover:text-green-500 ml-[-5px] ${postReposted ? 'text-green-500': ''}`}>{postRepostCount}</p>
                     </button>
 
-                    <button onClick={(e) => handlePostLike(e)} className='min-w-12 group cursor-pointer flex items-end text-gray-500'>
+                    <button onClick={(e) => handlePostLike(e)} className='min-w-12 group cursor-pointer flex items-center text-gray-500'>
                     <div className="p-2 group-hover:bg-red-100/60 transition-colors duration-200 rounded-full">
-                        <Heart strokeWidth={2} className={`h-5.5 w-5.5 stroke-gray-500 group-hover:stroke-red-400 ${postLiked ? 'fill-red-400 stroke-red-400' : ''}`}/>
+                        <Heart strokeWidth={2} className={`h-4.5 w-4.5 stroke-gray-500 group-hover:stroke-red-400 ${postLiked ? 'fill-red-400 stroke-red-400' : ''}`}/>
                     </div>
-                    <p className={`pb-1.5 font-medium group-hover:text-red-400 ml-[-5px] ${postLiked ? 'text-red-400' : ''}`}>{postLikeCount}</p>
+                    <p className={`pt-1 font-medium group-hover:text-red-400 ml-[-5px] ${postLiked ? 'text-red-400' : ''}`}>{postLikeCount}</p>
                     </button>
 
-                    <button onClick={(e) => handleBookmark(e)} className='min-w-12 group cursor-pointer flex justify-end items-end'>
+                    <button onClick={(e) => handleBookmark(e)} className='min-w-12 group cursor-pointer flex justify-end items-center'>
                         <div className="p-2 group-hover:bg-blue-100/60 rounded-full">
-                            <Bookmark strokeWidth={2} className={`h-5.5 w-5.5  group-hover:stroke-blue-500 ${postBookmarked ? 'fill-blue-500 stroke-blue-500' : 'stroke-gray-500'}`}/>
+                            <Bookmark strokeWidth={2} className={`h-4.5 w-4.5  group-hover:stroke-blue-500 ${postBookmarked ? 'fill-blue-500 stroke-blue-500' : 'stroke-gray-500'}`}/>
                         </div>
                     </button>
                 </div>
