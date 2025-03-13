@@ -12,7 +12,7 @@ function Layout(){
     const {publishPost, setPublishPost, setNotifications} = useUser()
 
     return (
-        <div className='flex justify-center'>
+        <div className='md:flex justify-center'>
             <ScrollRestoration/>
 
             <SocketConnection setNotifications={setNotifications}/>
@@ -29,7 +29,7 @@ function Layout(){
                 <Nav/>
             </div>
 
-            <div className='sm:min-w-[650px] w-full max-w-[650px] border-x border-slate-200'>
+            <div className='sm:min-w-[650px] w-full md:max-w-[650px] border-x border-slate-200'>
                 <Outlet/>
             </div>
 

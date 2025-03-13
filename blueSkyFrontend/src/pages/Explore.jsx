@@ -3,8 +3,13 @@ import { has, throttle } from "lodash"
 import { useEffect, useState } from "react"
 import PostCard from "../components/PostCard"
 import Reposted from "../components/Reposted"
+import { useUser } from "../context/userContext"
+import { UserRound } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 function Explore(){
+    const {user} = useUser()
+    const navigate = useNavigate()
     const [searchStr, setSearchStr] = useState('')
     const [page, setPage] = useState(1)
     const [hasMorePosts, setHasMorePosts] = useState(true)
@@ -89,17 +94,28 @@ function Explore(){
 
     return(
         <div>
-            <div className="relative z-20 sticky top-0 bg-white border-b border-slate-200 p-4">
+            <div className="flex items-center gap-2 md:block relative z-20 sticky top-0 bg-white border-b border-slate-200 p-2">
+                {
+                    user?.username &&
+                    <div onClick={() => navigate(`/user/${user?.username}`)} className='md:hidden cursor-pointer p-2 max-w-12 w-12 rounded-full hover:bg-slate-200/50'>
+                        {!user?.avatar ?
+                            <div className='mr-2 h-8 w-8 bg-slate-200 flex justify-center items-center rounded-full object-cover'>
+                                <UserRound className='h-4 w-4 stroke-gray-600 rounded-full'/>
+                            </div> :
 
+                            <img className='mr-2 block h-8 w-8 rounded-full object-cover' src={user?.avatar} alt="" />
+                        }
+                    </div>
+                }
                 <input
-                    className="outline rounded-2xl outline-slate-200 focus:outline-slate-500 w-full px-3 py-2 text-lg" placeholder="search post or users"
+                    className="outline rounded-xl outline-slate-200 focus:outline-slate-500 w-full h-min py-2 px-3" placeholder="search post or users"
                     type="text"
                     value={searchStr}
                     onChange={(e) => handleInput(e)}
                 />
 
-                {showSearch && <div className="absolute bg-white w-[90%] mx-4 mt-2 border border-slate-300 shadow-md overflow-hidden rounded-xl">
-                    <button type="submit" onClick={() => handleSearch(searchStr)} className="cursor-pointer text-lg p-2 w-full text-start hover:bg-slate-50">search <span className="font-bold">"{searchStr}"</span></button>
+                {showSearch && <div className="absolute top-13 left-8 md:top-11 bg-white w-[90%] mx-4 mt-2 border border-slate-300 shadow-md overflow-hidden rounded-xl">
+                    <button type="submit" onClick={() => handleSearch(searchStr)} className="cursor-pointer text-lg p-2 w-full text-start hover:bg-slate-50">search <span className="font-bold text-blue-500">"{searchStr}"</span></button>
                 </div>}
             </div>
 

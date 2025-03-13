@@ -82,8 +82,22 @@ function Chats(){
     return(
         <div className="relative w-full">
         <div className="w-full pb-186">
-            <div className="flex z-10 sticky top-0 bg-white/70 backdrop-blur-sm justify-between items-center py-3 px-4 border-b border-slate-200">
-                <p className="text-xl font-bold">Chats</p>
+            <div className="flex z-10 sticky top-0 bg-white/70 backdrop-blur-sm justify-between items-center p-2 md:p-3 border-b border-slate-200">
+                <div className="flex items-center">
+                    {
+                        user?.username &&
+                        <div onClick={() => navigate(`/user/${user?.username}`)} className='md:hidden cursor-pointer p-2 max-w-12 w-12 rounded-full hover:bg-slate-200/50'>
+                            {!user?.avatar ?
+                                <div className='mr-2 h-8 w-8 bg-slate-200 flex justify-center items-center rounded-full object-cover'>
+                                    <UserRound className='h-4 w-4 stroke-gray-600 rounded-full'/>
+                                </div> :
+
+                                <img className='mr-2 block h-8 w-8 rounded-full object-cover' src={user?.avatar} alt="" />
+                            }
+                        </div>
+                    }
+                    <p className="text-xl font-bold">Chats</p>
+                </div>
                 <button onClick={() => setNewChat(true)} className="cursor-pointer block flex items-center bg-blue-500 text-white px-3 py-1 rounded-xl gap-2">New chat</button>
             </div>
 

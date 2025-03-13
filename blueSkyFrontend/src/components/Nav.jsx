@@ -1,11 +1,13 @@
 import React from 'react'
 import { useUser } from '../context/userContext'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { usePostContext } from '../context/postContext'
-import { Bell, Bookmark, Cloudy, House, MessageCircle, Search, UserRound } from 'lucide-react'
+import { Bell, Bookmark, Cloudy, House, LogOut, MessageCircle, Search, UserRound } from 'lucide-react'
 
 function Nav(){
     const {user, setPublishPost, logout} = useUser()
+    const {pathname} = useLocation()
+    console.log(pathname)
     const navigate = useNavigate()
     const {setPosts} = usePostContext()
 
@@ -13,7 +15,6 @@ function Nav(){
         <div className='md:h-full md:flex md:flex-col md:justify-between md:w-full md:max-w-[310px] md:mr-2'>
             <div className='fixed py-2 flex justify-between bottom-0 left-0 right-0 bg-white z-20 md:py-auto md:block md:relative md:mt-6'>
                 <button onClick={() => navigate('/')} className='hidden md:block md:cursor-pointer md:px-5 md:mb-4'>
-                    {/* <Hash strokeWidth='1.5' className='h-8 w-8'/> */}
                     <Cloudy strokeWidth='2' className='h-8 w-8 fill-blue-400 stroke-blue-500'/>
                 </button>
 
@@ -99,7 +100,7 @@ function Nav(){
 
 
             {user?.username &&
-            <div className='hidden py-2 px-2 mx-2 rounded-full hover:bg-slate-100 mb-4 md:flex justify-between items-center'>
+            <div className='hidden py-2 px-2 mx-2  rounded-full hover:bg-slate-100 mb-4 md:flex justify-between items-center'>
 
                 <div className='flex items-center'>
                     {!user?.avatar ?
@@ -122,11 +123,45 @@ function Nav(){
             }
 
             {!user?.username &&
-                <div className='mx-2 flex gap-2 justify-center mb-12'>
-                    <button className='bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700' onClick={() => navigate('/auth/login')} >Login</button>
-                    <button className='bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700' onClick={() => navigate('/auth/registration')} >Signup</button>
+                <div className='mx-2 hidden md:flex gap-2 justify-center mb-12'>
+                    <button className='bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700' onClick={() => navigate('/auth/login')} >Login</button>
+                    <button className='bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700' onClick={() => navigate('/auth/registration')} >Signup</button>
                 </div>
             }
+
+            {/* mobile responsive */}
+            {pathname === '/' &&
+                <div className='md:hidden border-r border-slate-200 z-40 flex justify-between sticky top-0 p-1'>
+                    {user?.username ?
+                        <div onClick={() => navigate(`/user/${user?.username}`)} className='cursor-pointer p-2 max-w-12 w-12 rounded-full hover:bg-slate-200/50'>
+                            {!user?.avatar ?
+                                <div className='mr-2 h-8 w-8 bg-slate-200 flex justify-center items-center rounded-full object-cover'>
+                                    <UserRound className='h-4 w-4 stroke-gray-600 rounded-full'/>
+                                </div> :
+
+                                <img className='mr-2 block h-8 w-8 rounded-full object-cover' src={user?.avatar} alt="" />
+                            }
+                        </div> :
+                        <div className='p-2 max-w-12 w-12 rounded-full'>
+
+                        </div>
+                    }
+
+                    <button onClick={() => navigate('/')} className='cursor-pointer max-w-12 w-12 flex justify-center items-center md:cursor-pointer md:px-5 md:mb-4'>
+                        <Cloudy strokeWidth='2' className='h-8 w-8 fill-blue-400 stroke-blue-500'/>
+                    </button>
+
+                    <div className='max-w-12 w-12 flex justify-center items-center'>
+                        {user?.username ?
+                            <LogOut onClick={logout} className='cursor-pointer stroke-red-500 w-8 h-8 p-2 bg-red-200/50 hover:bg-red-200 rounded-full'/> :
+                                <button className='cursor-pointer hover:bg-indigo-700 text-white rounded-full p-1 px-3 bg-indigo-600 mr-8' onClick={() => navigate('/auth/login')}>Login</button>
+
+                        }
+                    </div>
+                </div>
+            }
+
+
         </div>
     )
 }

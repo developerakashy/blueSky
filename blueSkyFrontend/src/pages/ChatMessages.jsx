@@ -5,6 +5,11 @@ import { useUser } from "../context/userContext";
 import formatDate from "../utils/formatDate";
 import formatTime from "../utils/formatTime";
 import { UserRound } from "lucide-react";
+import { ring } from 'ldrs'
+
+ring.register()
+
+
 
 
 function ChatMessages(){
@@ -13,6 +18,7 @@ function ChatMessages(){
     const {user, setMessages, messages} = useUser()
     const [receiver, setReceiver] = useState({})
     const [msgText, setMsgText] = useState('')
+    const [loading, setLoading] = useState(false)
 
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
@@ -45,7 +51,8 @@ function ChatMessages(){
     }, [chatId])
 
     const handleSendMessage = async () => {
-        if(!msgText?.trim()) return
+        if(!msgText?.trim() || loading) return
+        setLoading(true)
 
         try {
             const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/chat/message`,
@@ -61,6 +68,8 @@ function ChatMessages(){
             setMsgText('')
         } catch (error) {
             console.log(error)
+        } finally {
+            setTimeout(() => setLoading(false), 400)
         }
     }
 
@@ -89,7 +98,7 @@ function ChatMessages(){
             </div>
 
 
-            <div  className="w-full flex flex-col gap-2 px-2 pb-18 border-blue-400 max-h-[85.5%] overflow-y-auto">
+            <div  className="w-full flex flex-col gap-2 px-2 border-blue-400 max-h-[80%] md:max-h-[85.5%] overflow-y-auto">
                 {messages && messages.map((message, index) =>
                     <div ref={messagesEndRef} key={message?._id} className={`mt-2 max-w-[50%] flex-col ${message?.senderUserId?._id === user?._id ? 'flex items-end self-end' : ''}`}>
                             <p className={`w-fit px-4 py-3 leading-5 rounded-t-3xl ${ message?.senderUserId?._id === user?._id ? 'rounded-l-3xl bg-blue-200': 'rounded-r-3xl bg-gray-100'}`}>{message.message}</p>
@@ -99,16 +108,27 @@ function ChatMessages(){
 
             </div>
 
-            <div className="bg-white border border-slate-200 px-4 py-2 absolute bottom-0 left-0 right-0 flex justify-between items-center">
+            <div className="w-full bg-white border border-slate-200 px-4 py-2 absolute bottom-12 md:bottom-0 left-0 right-0 flex gap-2 justify-between items-center">
                 <input
-                    className="outline-1 outline-slate-200 focus:outline-slate-400 w-[85%] h-10 text-lg px-3 rounded-2xl"
+                    className="outline-1 outline-slate-200 focus:outline-slate-400 max-w-[90%] w-full h-10 text-lg px-3 rounded-2xl"
                     type="text"
                     value={msgText}
+                    disabled={loading && true}
                     onChange={(e) => setMsgText(e.target.value)}
                     placeholder="start a new message"
                     ref={inputRef}
                 />
-                <button onClick={() => handleSendMessage()} className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-full h-min">send</button>
+                <button onClick={() => handleSendMessage()} className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-full flex">
+                    {loading ?
+                    <l-ring
+                      size="20"
+                      stroke="3"
+                      bg-opacity="0"
+                      speed="2"
+                      color="white"
+                    ></l-ring>:
+                    'send'}
+                </button>
             </div>
         </div>
     )

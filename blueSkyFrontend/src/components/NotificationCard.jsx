@@ -19,7 +19,7 @@ function NotificationCard({notification}){
             }
 
             {notification.type === 'like' &&
-            <div onClick={() => navigate(`/post/${notification?.relatedPostId?._id}`)} className="cursor-pointer border-b border-slate-200 flex gap-2 px-4 py-3 hover:bg-slate-50">
+            <div onClick={() => navigate(`/post/${notification?.relatedPostId?._id}`)} className="cursor-pointer border-b border-slate-200 flex gap-2 px-2 py-2 hover:bg-slate-50">
                 <div className="min-w-12 flex justify-center">
                     <Heart className="h-7.5 w-7.5 fill-red-500 stroke-red-500"/>
                 </div>
