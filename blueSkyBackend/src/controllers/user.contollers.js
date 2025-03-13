@@ -260,8 +260,8 @@ const updateProfile = asyncHandler(async (req, res) => {
     }
 
 
-    if(avatarImage) updates.avatar = avatarImage.url
-    if(coverImage) updates.coverImage = coverImage.url
+    if(avatarImage) updates.avatar = avatarImage.secure_url
+    if(coverImage) updates.coverImage = coverImage.secure_url
 
     if(Object.keys(updates).length === 0) throw new ApiError(400, 'No fields provided for profile update')
 

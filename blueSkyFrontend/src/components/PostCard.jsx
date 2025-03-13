@@ -359,7 +359,7 @@ function PostCard({post, repliedTo, parentPost}){
         </div>
 
         {previewImage &&
-        <div className="z-30 fixed right-0 top-0 bottom-0 w-screen h-screen bg-black/90 flex flex-col items-center justify-center">
+        <div className="z-40 fixed right-0 top-0 bottom-0 w-screen h-screen bg-black/90 flex flex-col items-center justify-center">
             <button className="cursor-pointer fixed top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
             <div className="h-[95%] flex items-center">
                 <img className="min-h-[600px] max-h-full object-contain" src={imageUrl[currentIndex]} alt="" />
@@ -373,7 +373,7 @@ function PostCard({post, repliedTo, parentPost}){
         }
 
         {previewVideo &&
-        <div className="z-30 fixed right-0 top-0 w-screen h-screen bg-black/90 flex flex-col items-center justify-center">
+        <div className="z-40 fixed right-0 top-0 w-screen h-screen bg-black/90 flex flex-col items-center justify-center">
             <button className="cursor-pointer fixed z-40 top-5 left-12 text-white" onClick={(e) => closeModal(e)}>Close</button>
             <div className="h-[95%] flex items-center object-contain">
                 <video className="max-h-full min-w-[600px]" src={imageUrl[currentIndex]} controls>

@@ -53,7 +53,7 @@ const publishPost = asyncHandler(async (req, res) => {
         for(const file of mediaFiles){
             try {
                 const response = await uploadOnCloudinary(file?.path)
-                mediaFileUrls.push(response.url)
+                mediaFileUrls.push(response.secure_url)
                 publicIds.push(response.public_id)
             } catch (error) {
                 throw new ApiError(400, `Error uploading: ${file}`)
@@ -189,7 +189,7 @@ const updatePost = asyncHandler(async (req, res) => {
         for(const file of mediaFiles){
             try {
                 const response = await uploadOnCloudinary(file?.path)
-                mediaFileUrls.push(response.url)
+                mediaFileUrls.push(response.secure_url)
                 publicIds.push(response.public_id)
             } catch (error) {
                 throw new ApiError(400, `Error uploading: ${file}`)

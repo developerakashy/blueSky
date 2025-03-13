@@ -131,7 +131,7 @@ function Nav(){
 
             {/* mobile responsive */}
             {pathname === '/' &&
-                <div className='md:hidden border-r border-slate-200 z-40 flex justify-between sticky top-0 p-1'>
+                <div className='md:hidden border-r border-slate-200 flex justify-between sticky top-0 p-1'>
                     {user?.username ?
                         <div onClick={() => navigate(`/user/${user?.username}`)} className='cursor-pointer p-2 max-w-12 w-12 rounded-full hover:bg-slate-200/50'>
                             {!user?.avatar ?
@@ -154,7 +154,7 @@ function Nav(){
                     <div className='max-w-12 w-12 flex justify-center items-center'>
                         {user?.username ?
                             <LogOut onClick={logout} className='cursor-pointer stroke-red-500 w-8 h-8 p-2 bg-red-200/50 hover:bg-red-200 rounded-full'/> :
-                                <button className='cursor-pointer hover:bg-indigo-700 text-white rounded-full p-1 px-3 bg-indigo-600 mr-8' onClick={() => navigate('/auth/login')}>Login</button>
+                            <button className='cursor-pointer hover:bg-indigo-700 text-white rounded-full p-1 px-3 bg-indigo-600 mr-8' onClick={() => navigate('/auth/login')}>Login</button>
 
                         }
                     </div>

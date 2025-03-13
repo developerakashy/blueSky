@@ -20,7 +20,7 @@ const verifyJwtToken = asyncHandler(async (req, res, next) => {
 
     if(!incomingAccessToken?.trim()){
         if(isPublicRoute(req)) return next()
-        
+
 
         throw new ApiError(400, 'user not loggedIn')
     }
