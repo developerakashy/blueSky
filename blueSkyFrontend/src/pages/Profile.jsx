@@ -139,7 +139,7 @@ function Profile(){
 
         console.log(followed, wasFollowedRef)
         followTimeoutRef.current = setTimeout(async () => {
-            if(followed && followed !== wasFollowedRef.current && user){
+            if(followed !== wasFollowedRef.current && user){
                 const res = await toggleFollow()
                 wasFollowedRef.current = followed
                 setFollowerCount(prev => followed ? prev + 1 : prev - 1)
