@@ -1,6 +1,6 @@
 import axios from "axios"
 import { useUser } from "../context/userContext"
-import { toast } from "react-toastify"
+import toast from "react-hot-toast"
 import { useState } from "react"
 import { CircleX, Mail, MailOpen } from 'lucide-react'
 
@@ -23,7 +23,7 @@ function Verification({setPublishPost}){
             toast.error(error?.response?.data?.message)
 
         } finally {
-            setTimeout(() => setLoading(false), 500)
+            setLoading(false)
         }
     }
 
@@ -55,22 +55,18 @@ function Verification({setPublishPost}){
 
         try {
             const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/verify-code`, {verificationCode}, {withCredentials: true})
-
             user.isVerified = data?.data?.isVerified
-            setTimeout(() => {
-                toast.success('user verified successfully')
-            }, 500)
+            toast.success('user verified successfully')
+
 
         } catch (error) {
-            setTimeout(() => {
-                toast.error(error?.response?.data?.message)
-                setInvalidCodeError(`*${error?.response?.data?.message}`)
-            }, 500)
+            toast.error(error?.response?.data?.message)
+            setInvalidCodeError(`*${error?.response?.data?.message}`)
+
 
         } finally {
-            setTimeout(() => {
-                setLoading(false)
-            }, 600)
+            setLoading(false)
+
         }
     }
 

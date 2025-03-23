@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useRef } from "react"
 import { useUser } from "../context/userContext"
 import axios from "axios"
-import PostCard from "./PostCard"
 import Verification from "./Verification"
 import { Image, UserRound, X } from "lucide-react"
 import PostInput from "./PostInput"
-import { toast } from "react-toastify"
+import toast from "react-hot-toast"
 
-const users = ["Akash", "JohnDoe", "JaneDoe", "Alice", "Bob"];
 
 function CreatePost({setPosts, parentPost, setPublishPost}){
     const { user, setLoading } = useUser()
@@ -73,8 +71,8 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
         console.log(values)
 
         if(values.length < 1){
-          toast.warn('Post cannot be empty')
-          setTimeout(() => setLoading(false), 700)
+          toast.error('Post cannot be empty')
+          setLoading(false)
 
           return
         }
@@ -96,7 +94,7 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
             toast.error(error?.response?.data?.message)
 
         } finally {
-            setTimeout(() => setLoading(false), 700)
+            setLoading(false)
         }
     }
 

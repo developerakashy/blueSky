@@ -6,7 +6,7 @@ import { usePostContext } from "../context/postContext";
 import { Bookmark, Heart, Repeat2, UserRound } from "lucide-react";
 import PostText from "./PostText";
 import formatTimeLine from "../utils/formatTimeLine";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 
 
 function PostCard({post, repliedTo, parentPost}){
@@ -62,18 +62,17 @@ function PostCard({post, repliedTo, parentPost}){
 
                 console.log(data)
                 setPosts(prev => prev.filter(post => post?._id !== data?.data?._id))
-                setTimeout(() => {
-                    toast.success('Post deleted successfully')
-                }, 500);
+
+                toast.success('Post deleted successfully')
+
 
             } catch (error) {
                 console.log(error)
                 toast.error(error?.response?.data?.message)
 
             }finally {
-                setTimeout(() => {
-                    setLoading(false)
-                }, 500);
+                setLoading(false)
+
             }
         }
 
@@ -167,6 +166,7 @@ function PostCard({post, repliedTo, parentPost}){
                 return data?.data?.userIdArray?.length
             } catch (error) {
                 console.log(error)
+                setPostLikeCount(post.likeCount)
             }
         }
 
@@ -175,12 +175,19 @@ function PostCard({post, repliedTo, parentPost}){
                 console.log('request sent')
                 const result = await togglePostLike()
                 wasPostLikedRef.current = postLiked
-                post.userLiked = postLiked
-                post.likeCount = result
+
+
+                setPostLiked(postLiked)
                 setPostLikeCount(result)
 
             }
         }, 700)
+
+        return () => {
+            if(likeTimeoutRef.current){
+                clearTimeout(likeTimeoutRef.current)
+            }
+        }
 
     }, [postLiked])
 
@@ -331,21 +338,21 @@ function PostCard({post, repliedTo, parentPost}){
                                 <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-2,2a1,1,0,0,0-.21,1.09A1,1,0,0,0,3,22h9A10,10,0,0,0,12,2Zm0,18H5.41l.93-.93a1,1,0,0,0,0-1.41A8,8,0,1,1,12,20Z"/>
                             </svg>
                         </div>
-                        <p className="mt-1 font-medium group-hover:text-blue-500 ml-[-5px] brder">{postReplyCount}</p>
+                        <p className="pt-[3px] font-medium group-hover:text-blue-500 ml-[-5px] brder">{postReplyCount}</p>
                     </button>
 
                     <button onClick={(e) => handleRepost(e)} className='min-w-12 group cursor-pointer flex items-center text-xs text-gray-500'>
                         <div className="p-2 group-hover:bg-green-100/60 transition-colors duration-200 rounded-full">
                             <Repeat2 strokeWidth={2} className={`h-4.5 w-4.5 stroke-gray-500 group-hover:stroke-green-500 ${postReposted ? 'stroke-green-500': ''}`}/>
                         </div>
-                        <p className={`mt-1 font-medium group-hover:text-green-500 ml-[-5px] ${postReposted ? 'text-green-500': ''}`}>{postRepostCount}</p>
+                        <p className={`pt-[3px] font-medium group-hover:text-green-500 ml-[-5px] ${postReposted ? 'text-green-500': ''}`}>{postRepostCount}</p>
                     </button>
 
                     <button onClick={(e) => handlePostLike(e)} className='min-w-12 group cursor-pointer flex items-center text-xs text-gray-500'>
                     <div className="p-2 group-hover:bg-red-100/60 transition-colors duration-200 rounded-full">
                         <Heart strokeWidth={2} className={`h-4 w-4 stroke-gray-500 group-hover:stroke-red-400 ${postLiked ? 'fill-red-400 stroke-red-400' : ''}`}/>
                     </div>
-                    <p className={`mt-1 font-medium group-hover:text-red-400 ml-[-5px] ${postLiked ? 'text-red-400' : ''}`}>{postLikeCount}</p>
+                    <p className={`pt-[3px] font-medium group-hover:text-red-400 ml-[-5px] ${postLiked ? 'text-red-400' : ''}`}>{postLikeCount}</p>
                     </button>
 
                     <button onClick={(e) => handleBookmark(e)} className='min-w-12 group cursor-pointer flex justify-end items-end'>

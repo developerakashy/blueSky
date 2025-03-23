@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useUser } from '../context/userContext'
 import { useNavigate } from 'react-router-dom'
-import { ToastContainer, toast } from 'react-toastify'
+import toast from 'react-hot-toast'
 import 'ldrs/mirage'
 import 'ldrs/dotPulse'
 import axios from "axios"
 
 function Login(){
-    const {setUser, loading, setLoading} = useUser()
+    const {setUser, setLoading} = useUser()
     const navigate = useNavigate()
     const [formData, setFormData] = useState({
         username: '',
@@ -65,14 +65,14 @@ function Login(){
 
         if(Object.keys(emptyErrors).length > 0){
             setErrors(prev => ({...emptyErrors, ...prev}))
-            toast.warn('All fields are required')
+            toast.error('All fields are required')
             return
         }
 
         const isFormValid = Object.values(errors)?.some(val => val !== undefined)
 
         if(isFormValid){
-            toast.warn('Error in fields')
+            toast.error('Error in fields')
             return
         }
 
@@ -88,21 +88,16 @@ function Login(){
             console.log(data.data)
             setUser(data.data)
 
-            setTimeout(() => {
-                toast.success(`You logged in successfully`)
-                navigate('/')
+            toast.success(`You logged in successfully`)
+            navigate('/')
 
-            }, 500)
 
         } catch (error) {
             console.log(error)
             toast.error('username or password is incorrect')
 
         } finally {
-            setTimeout(() => {
-                setLoading(false)
-
-            }, 600)
+            setLoading(false)
         }
     }
 

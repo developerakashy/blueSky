@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PostCard from '../components/PostCard'
 import axios from 'axios'
-import { useUser } from '../context/userContext'
 import { usePostContext } from '../context/postContext'
 import { throttle } from 'lodash'
 import { ring2 } from 'ldrs'
@@ -135,7 +134,7 @@ function Home(){
     }
 
     return(
-        <div className='w-full'>
+        <div className='w-full pb-12'>
             <div className='h-12 border-b border-slate-200 flex sticky top-0 bg-white z-30'>
                 <button onClick={() => handleSectionChange('all')} className={`cursor-pointer w-full ${activeSection === 'all' ? 'border-b-3 border-blue-500 font-bold' : ''} hover:bg-slate-100`}>All</button>
                 <button onClick={() => handleSectionChange('following')} className={`cursor-pointer w-full ${activeSection === 'following' ? 'border-b-3 border-blue-500 font-bold' : ''} hover:bg-slate-100`}>Following</button>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import NotificationCard from "../components/NotificationCard";
 import { useUser } from "../context/userContext";
 import { UserRound } from "lucide-react";

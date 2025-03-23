@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { UserContextProvider } from './context/userContext'
 import { PostContextProvider } from './context/postContext'
 import { ToastContainer } from 'react-toastify'
+import { Toaster } from 'react-hot-toast'
 import { RouterProvider } from 'react-router-dom'
 import axios from 'axios'
 import router from './router'
@@ -93,7 +94,9 @@ function App() {
         </div>
       }
 
-      <ToastContainer/>
+      <Toaster
+        position='bottom-right'
+      />
 
       <RouterProvider router={router} future={{ v7_startTransition: true, v7_relativeSplatPath: true, }}/>
 

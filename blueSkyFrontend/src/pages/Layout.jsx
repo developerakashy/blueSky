@@ -4,7 +4,6 @@ import Nav from '../components/Nav'
 import { useUser } from '../context/userContext'
 import CreatePost from '../components/CreatePost'
 import SocketConnection from './SocketConnection'
-import { ToastContainer } from 'react-toastify'
 import Search from '../components/Search'
 import UserRecommend from '../components/UserRecommend'
 

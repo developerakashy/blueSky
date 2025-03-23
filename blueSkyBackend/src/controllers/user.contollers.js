@@ -319,14 +319,11 @@ const updateProfile = asyncHandler(async (req, res) => {
 const logout = asyncHandler(async (req, res) => {
 
     try {
-        const user = await User.findById(req.user._id)
-
-        if(!user) throw new ApiError(400, 'user not loggedIn')
 
         return res
                 .clearCookie('accessToken', options)
                 .clearCookie('refreshToken', options)
-                .json(new ApiResponse(200, user, 'User Logged Out'))
+                .json(new ApiResponse(200, {}, 'User Logged Out'))
 
     } catch (error) {
         throw new ApiError(400, error?.message || 'something went wrong')

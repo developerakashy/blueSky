@@ -1,5 +1,4 @@
 import axios from "axios"
-import { throttle } from "lodash"
 import { useEffect, useState } from "react"
 import PostCard from "./PostCard"
 

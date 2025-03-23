@@ -7,7 +7,7 @@ import PostText from './PostText'
 import { Bookmark, Heart, Repeat2, UserRound } from 'lucide-react'
 import formatTime from '../utils/formatTime'
 import formatDate from '../utils/formatDate'
-import { toast } from 'react-toastify'
+import toast from 'react-hot-toast'
 import { usePostContext } from '../context/postContext'
 
 function Post({post, postReplies, parentPost}){
@@ -58,20 +58,19 @@ function Post({post, postReplies, parentPost}){
 
                 console.log(data)
                 setPostContext(prev => prev.filter(post => post?._id !== data?.data?._id))
-                setTimeout(() => {
-                    toast.success('Post deleted successfully')
-                    navigate('/')
-                }, 500);
+
+                toast.success('Post deleted successfully')
+                navigate('/')
+
 
             } catch (error) {
                 console.log(error)
                 toast.error(error?.response?.data?.message)
 
             }finally {
-                setTimeout(() => {
-                    setLoading(false)
+                setLoading(false)
 
-                }, 500);
+
             }
         }
 
@@ -169,7 +168,6 @@ function Post({post, postReplies, parentPost}){
         }
 
         setPostLikeCount(prev => postLiked ? prev - 1 : prev + 1)
-
         setPostLiked(prev => !prev)
 
     }

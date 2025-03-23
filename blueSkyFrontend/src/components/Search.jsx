@@ -1,9 +1,10 @@
 import axios from "axios"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import debounce from "../utils/debounce"
 import { useUser } from "../context/userContext"
 import { UserRound, X } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import toast from "react-hot-toast"
 
 function Search(){
     const navigate = useNavigate()
@@ -24,13 +25,11 @@ function Search(){
             toast.error(error?.response?.data?.message)
 
         } finally {
-            setTimeout(() => {
 
-            }, 500)
         }
     }
 
-    const debounceGetUser = useMemo(() => debounce(() => fetchUsers(searchStr), 500), [searchStr])
+    const debounceGetUser = useCallback(debounce(() => fetchUsers(searchStr), 500), [searchStr])
 
     useEffect(() => {
         if(searchStr?.trim()){

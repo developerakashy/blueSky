@@ -1,16 +1,15 @@
-import React, { useEffect, useState, useMemo } from "react";
-import 'ldrs/mirage'
-import 'ldrs/dotPulse'
-import { ToastContainer, toast } from 'react-toastify'
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import toast from "react-hot-toast";
 import debounce from '../utils/debounce'
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/userContext";
+import { dotPulse } from "ldrs";
+dotPulse.register()
 
 function Registration(){
-    const {loading, setLoading} = useUser()
+    const {setLoading} = useUser()
     const navigate = useNavigate()
-    // const [loading, setLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [formData, setFormData] = useState({
         firstName: '',
@@ -19,26 +18,21 @@ function Registration(){
         username: '',
         password: ''
     })
-
-    const [username, setUsername] = useState(null)
     const [checkingUsername, setCheckingUsername] = useState(false)
-    const [isUsernameAvailable, setIsUsernameAvailable] = useState(null)
-
-    const [email, setEmail] = useState(null)
+    const [isUsernameAvailable, setIsUsernameAvailable] = useState(false)
     const [emailExist, setEmailExist] = useState(false)
-
     const [errors, setErrors] = useState({})
 
     useEffect(() => {
         setLoading(false)
-    })
+    }, [])
 
     const handleInputChange = async (e) => {
         let {name, value} = e.target
         const newErrors = {}
 
         value = value?.trim()
-        setFormData(prev => ({...prev, [name]: value }))
+        setFormData(prev => prev[name] !== value ? {...prev, [name]: value } : prev)
 
 
         if(name === 'firstName'){
@@ -74,7 +68,6 @@ function Registration(){
 
             } else {
                 newErrors.email = undefined
-                setEmail(value)
             }
 
         }
@@ -93,7 +86,7 @@ function Registration(){
             } else {
                 newErrors.username = undefined
                 setCheckingUsername(true)
-                setUsername(value)
+
             }
 
         }
@@ -128,16 +121,18 @@ function Registration(){
             console.log(error)
 
         } finally {
-            username && setCheckingUsername(false)
+            setTimeout(() => {
+                username && setCheckingUsername(false)
+            }, 500)
         }
 
     }
 
-    const debounceCheckUserWithUsername = useMemo(() => debounce(() => checkUserAvailability(username, ''), 500), [username])
-    const debounceCheckUserWithEmail = useMemo(() => debounce(() => checkUserAvailability('', email) ,1000), [email])
+    const debounceCheckUserWithUsername = useCallback(debounce(() => checkUserAvailability(formData.username, ''), 500), [formData.username])
+    const debounceCheckUserWithEmail = useCallback(debounce(() => checkUserAvailability('', formData.email) ,1000), [formData.email])
 
     useEffect(() => {
-        if(username?.trim()){
+        if(formData.username?.trim() && !errors?.username){
             debounceCheckUserWithUsername()
         }
 
@@ -145,10 +140,10 @@ function Registration(){
             debounceCheckUserWithUsername.cancel()
         }
 
-    }, [username, debounceCheckUserWithUsername])
+    }, [formData.username, debounceCheckUserWithUsername])
 
     useEffect(() => {
-        if(email?.trim()){
+        if(formData.email?.trim() && !errors?.email){
             debounceCheckUserWithEmail()
         }
 
@@ -156,7 +151,7 @@ function Registration(){
             debounceCheckUserWithEmail.cancel()
         }
 
-    }, [email, debounceCheckUserWithEmail])
+    }, [formData.email, debounceCheckUserWithEmail])
 
 
     const handelUserRegistration = async (e) => {
@@ -171,7 +166,7 @@ function Registration(){
 
             if(Object.keys(emptyErrors).length > 0) setErrors(prev => ({...emptyErrors, ...prev}))
 
-            toast.warn('All fields are required')
+            toast.error('All fields are required')
             return
 
         }
@@ -183,13 +178,13 @@ function Registration(){
             return
         }
 
-        if(!isUsernameAvailable) {
-            toast.warn('username unavailable. Choose new username')
+        if(emailExist){
+            toast.error('Account exist with provided Email ID. Try to sign in')
             return
         }
 
-        if(emailExist){
-            toast.warn('Account exist with provided Email ID. Try to sign in')
+        if(!isUsernameAvailable) {
+            toast.error('username unavailable. Choose new username')
             return
         }
 
@@ -211,33 +206,25 @@ function Registration(){
             console.log(data)
             toast.success('user created successfully')
 
-            setTimeout(() => {
-                setFormData({
-                    firstName: '',
-                    lastName: '',
-                    email: '',
-                    username: '',
-                    password: ''
-                })
-                setIsUsernameAvailable(null)
-                setEmail(null)
-                setUsername(null)
-                setShowPassword(false)
-                setErrors({})
-                navigate('/')
-            }, 500)
-
+            setFormData({
+                firstName: '',
+                lastName: '',
+                email: '',
+                username: '',
+                password: ''
+            })
+            setIsUsernameAvailable(false)
+            setShowPassword(false)
+            setErrors({})
+            navigate('/auth/login')
 
         } catch (error) {
             console.log(error)
-            if(error?.response?.data?.message?.userExist){
-                setErrors(prev => ({...prev, email: '*Email ID already exist with an account. Try to sign in'}))
-            }
-        } finally {
-            setTimeout(() => {
-                setLoading(false)
+            toast.error(error?.response?.data?.message)
 
-            }, 600)
+        } finally {
+            setLoading(false)
+
         }
     }
 
@@ -314,7 +301,7 @@ function Registration(){
                         {
                             checkingUsername &&
                             <div className='flex items-center gap-2'>
-                                <p className='text-sm text-blue-500 mt-1 '>checking username</p>
+                                <p className='text-sm text-blue-600 mt-1 '>checking username</p>
                                 <l-dot-pulse
                                     size='20'
                                     speed='1'
@@ -323,8 +310,8 @@ function Registration(){
                             </div>
                         }
 
-                        {isUsernameAvailable && <p className='mt-1 text-sm text-green-500'>username available</p> }
-                        {!isUsernameAvailable && isUsernameAvailable !== null && <p className='mt-1 text-sm text-orange-500'>username unavailable</p>}
+                        {((isUsernameAvailable && !errors?.username) && !checkingUsername) && <p className='mt-1 text-sm text-green-500'>username available</p> }
+                        {((isUsernameAvailable === false && !errors?.username) && (!checkingUsername && formData.username)) && <p className='mt-1 text-sm text-orange-500'>username unavailable</p>}
                     </div>
 
                     <div className="w-full pb-6">
@@ -357,15 +344,6 @@ function Registration(){
                 </div>
 
             </form>
-
-            {/* {loading && <div className='bg-white/60 fixed border-1 right-0 left-0 top-0 bottom-0 flex justify-center items-center'>
-                <l-mirage
-                    size="80"
-                    speed="1.5"
-                    color="blue"
-                ></l-mirage>
-            </div>} */}
-            {/* <ToastContainer/> */}
         </div>
     )
 }

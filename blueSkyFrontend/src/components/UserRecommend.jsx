@@ -1,6 +1,6 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { toast } from "react-toastify"
+import toast from "react-hot-toast"
 import { ring2 } from "ldrs"
 import UserCard from "./UserCard"
 
@@ -22,14 +22,12 @@ function UserRecommend(){
                 toast.error(error?.response?.data?.message)
 
             } finally {
-                setTimeout(() => {
-                    setLoading(false)
-                }, 500)
+                setLoading(false)
+
             }
         }
 
         fetchUsers()
-
 
     }, [])
 

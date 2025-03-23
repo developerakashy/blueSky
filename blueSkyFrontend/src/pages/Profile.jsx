@@ -6,8 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import EditProfile from "../components/EditProfile";
 import { Image, UserRound } from "lucide-react";
-import { toast } from "react-toastify";
-import { ring2 } from "ldrs";
+import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 import formatDate from "../utils/formatDate";
 
@@ -81,10 +80,10 @@ function Profile(){
             } catch (error) {
                 console.log(error);
                 toast.error(error?.response?.data?.message)
+
             } finally {
-                setTimeout(() => {
-                    setLoading(false)
-                }, 500)
+                setLoading(false)
+
             }
         }
 
@@ -156,10 +155,15 @@ function Profile(){
             {edit && <EditProfile setEdit={setEdit} user={user} setUser={setUser}/>}
             <div className='sticky bg-white/70 border-r border-slate-200 backdrop-blur-sm z-20 p-2 top-0 flex w-full items-center gap-4'>
                 <button onClick={() => navigate(-1)} className='cursor-pointer p-2 backdrop-blur-md hover:bg-black/10 rounded-full ml-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
+                {user?.username ?
                 <div className="">
                     <p className='font-semibold'>{user?.fullname?.toUpperCase()}</p>
                     <p className="text-sm text-gray-500">{data.posts?.length} Posts | {data.replies?.length} Replies | {data.userLiked?.length} Posts Liked</p>
+                </div> :
+                <div>
+                    <p className='font-semibold text-lg'>Profile</p>
                 </div>
+                }
             </div>
 
             <div>
@@ -183,32 +187,55 @@ function Profile(){
 
                 <div className={`text-end px-4 py-3 ${loading ? 'invisible' : ''}`}>
                     {userLoggedIn?.username === username ?
-                    <button onClick={() => setEdit(true)} className="cursor-pointer rounded-full px-4 py-2 bg-stone-200 mr-2">Edit profile</button> :
-                    <button onClick={handleFollow} className={`cursor-pointer rounded-full px-4 py-2 border-[1px] font-bold border-gray-200 ${followed ? ' text-black hover:bg-red-200 hover:text-red-600 hover:border-red-300' : 'bg-black text-white'}`}>{followed ? 'unfollow' : 'follow'}</button> }
+                        <button onClick={() => setEdit(true)} className="cursor-pointer rounded-full px-4 py-2 bg-stone-200 mr-2">Edit profile</button> :
+                        <button onClick={handleFollow} className={`${!userLoggedIn?.username ? 'invisible' : !user?.username ? 'invisible' : ''} cursor-pointer rounded-full px-4 py-2 border-[1px] font-bold border-gray-200 ${followed ? ' text-black hover:bg-red-200 hover:text-red-600 hover:border-red-300' : 'bg-black text-white'}`}>{followed ? 'unfollow' : 'follow'}</button>
+                    }
                 </div>
 
                 <div className="px-4">
                     <p className="font-bold text-2xl">{user?.fullname?.toUpperCase()}</p>
-                    <p className="text-gray-500 text-lg leading-tight">@{user?.username}</p>
-                    <p className="mt-2 leading-tight text-[15px]">{user?.about}</p>
-                    <p className="text-gray-500 mt-2 text-[15px]">Joined {formatDate(user?.createdAt, 'long')}</p>
+                    <p className={`${user?.username ? 'text-gray-500 text-lg' : 'text-xl font-medium'} leading-tight`}>@{user?.username || username}</p>
+                    {user?.username ?
+                        <div>
+                            <p className="mt-2 leading-tight text-[15px]">{user?.about}</p>
+                            <p className="text-gray-500 mt-2 text-[15px]">Joined {formatDate(user?.createdAt, 'long')}</p>
 
-                    <div className="mt-2 flex gap-4">
-                        <button onClick={() => navigate(`/user/${username}/followers`)} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{followerCount || 0}</span> Followers</button>
-                        <button onClick={() => navigate(`/user/${username}/followings`)} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{user?.followingCount || 0}</span> Followings</button>
-                    </div>
+                            <div className="mt-2 flex gap-4">
+                                <button onClick={() => navigate(`/user/${username}/followers`)} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{followerCount || 0}</span> Followers</button>
+                                <button onClick={() => navigate(`/user/${username}/followings`)} className="cursor-pointer hover:underline text-gray-500 text-[15px]"><span className="font-semibold text-black">{user?.followingCount || 0}</span> Followings</button>
+                            </div>
+                        </div> :
+                        !user?.username && loading ?
+                            <div className='p-4 flex justify-center'>
+                                <l-ring-2
+                                  size="32"
+                                  stroke="4"
+                                  stroke-length="0.25"
+                                  bg-opacity="0.1"
+                                  speed="0.8"
+                                  color="blue"
+                                ></l-ring-2>
+                            </div>:
+                            <div className="flex justify-center">
+                            <div className="my-10">
+                                <p className="text-3xl font-bold">This account dosen't</p>
+                                <p className="text-3xl font-bold">exist</p>
+                                <p className="">Try searching for another</p>
+                            </div>
+                        </div>
+                    }
 
                 </div>
 
             </div>
 
-            <div className="border-b backdrop-blur-sm border-slate-200 bg-white/70 border-r mt-3 flex sticky top-15 z-30">
-                <button onClick={() => navigate(`/user/${username}`)} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'posts' ? 'text-black' : 'text-gray-500'}`}>Posts</button>
-                <button onClick={() => navigate(`/user/${username}/replies`)} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'replies' ? 'text-black' : 'text-gray-500'}`}>Replies</button>
-                <button onClick={() => navigate(`/user/${username}/likes`)} className={`cursor-pointer w-full px-4 py-4 hover:bg-gray-100 font-semibold ${activeSection === 'likes' ? 'text-black' : 'text-gray-500'}`}>Likes</button>
-            </div>
+            {user?.username && <div className="border-b backdrop-blur-sm border-slate-200 bg-white/50 border-r mt-3 flex sticky top-15 z-30">
+                <button onClick={() => navigate(`/user/${username}`)} className={`cursor-pointer w-full px-4 py-4 backdrop-blur-sm hover:bg-gray-200/50 font-semibold ${activeSection === 'posts' ? 'text-black' : 'text-gray-500'}`}>Posts</button>
+                <button onClick={() => navigate(`/user/${username}/replies`)} className={`cursor-pointer w-full px-4 py-4 backdrop-blur-sm hover:bg-gray-200/50 font-semibold ${activeSection === 'replies' ? 'text-black' : 'text-gray-500'}`}>Replies</button>
+                <button onClick={() => navigate(`/user/${username}/likes`)} className={`cursor-pointer w-full px-4 py-4 backdrop-blur-sm hover:bg-gray-200/50 font-semibold ${activeSection === 'likes' ? 'text-black' : 'text-gray-500'}`}>Likes</button>
+            </div>}
 
-            <div className="pb-128">
+            {user?.username && <div className="pb-128">
                 {loading &&
                     <div className='p-4 flex justify-center'>
                         <l-ring-2
@@ -222,7 +249,7 @@ function Profile(){
                     </div>
                 }
                 {!loading && renderPost()}
-            </div>
+            </div>}
         </div>
     )
 }

@@ -2,8 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Post from "../components/Post";
-import { toast } from "react-toastify";
-import { ring2 } from 'ldrs'
+import toast from "react-hot-toast";
 
 function PostView(){
     const { postId } = useParams()
@@ -29,7 +28,7 @@ function PostView(){
                 toast.error(error?.response?.data?.message)
 
             } finally {
-                setTimeout(() => setLoading(false), 500)
+                setLoading(false)
             }
         }
 

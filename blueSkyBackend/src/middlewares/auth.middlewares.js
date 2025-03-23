@@ -1,5 +1,6 @@
 import { options } from "../constants.js";
-import { generateAccessAndRefreshToken } from "../controllers/user.contollers.js";
+import { generateAccessAndRefreshToken, logout } from "../controllers/user.contollers.js";
+import { Post } from "../models/post.models.js";
 import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncRequestHandler.js";
@@ -8,13 +9,13 @@ import jwt from 'jsonwebtoken'
 
 const isPublicRoute = (req) => {
     return (
-        (req?.baseUrl === '/post') &&
+        (req?.baseUrl === '/post' || req?.baseUrl === '/user' || req?.baseUrl === '/follow') &&
             req?.method === 'GET'
     )
 }
 
 const verifyJwtToken = asyncHandler(async (req, res, next) => {
-
+    console.log(req?.baseUrl)
     const incomingAccessToken = req?.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
     const incomingRefreshToken = req?.cookies?.refreshToken
 
@@ -30,7 +31,7 @@ const verifyJwtToken = asyncHandler(async (req, res, next) => {
     try {
         const decodeToken = jwt.verify(incomingAccessToken, process.env.JWT_SECRET)
 
-        const user = await User.findById(decodeToken._id).select('-password -refreshToken')
+        const user = await User.findById(decodeToken._id).select('-password -refreshToken -verificationCode -verificationCodeExpiry')
 
         if(!user) throw new ApiError(400, 'token mismatch')
 
@@ -62,7 +63,7 @@ const verifyJwtToken = asyncHandler(async (req, res, next) => {
 
         const decodeNewToken = jwt.verify(newAccessToken, process.env.JWT_SECRET)
 
-        const loggedInUser = await User.findById(decodeNewToken._id).select("-password -refreshToken")
+        const loggedInUser = await User.findById(decodeNewToken._id).select("-password -refreshToken -verificationCode -verificationCodeExpiry")
 
         req.user = loggedInUser
 

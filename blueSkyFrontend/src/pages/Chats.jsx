@@ -1,11 +1,10 @@
 import axios from "axios"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { useUser } from "../context/userContext"
 import { useNavigate } from "react-router-dom"
 import ChatCard from "../components/ChatCard"
-import { toast } from "react-toastify"
+import toast from "react-hot-toast"
 import debounce from "../utils/debounce"
-import UserCard from "../components/UserCard"
 import { UserRound, X } from "lucide-react"
 
 function Chats(){
@@ -56,13 +55,11 @@ function Chats(){
             toast.error(error?.response?.data?.message)
 
         } finally {
-            setTimeout(() => {
 
-            }, 500)
         }
     }
 
-    const debounceGetUser = useMemo(() => debounce(() => fetchUsers(searchStr), 500), [searchStr])
+    const debounceGetUser = useCallback(debounce(() => fetchUsers(searchStr), 500), [searchStr])
 
     useEffect(() => {
         if(searchStr?.trim()){

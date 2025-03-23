@@ -5,12 +5,10 @@ import PostView from "./pages/PostView";
 import Notification from "./pages/Notification";
 import Chats from "./pages/Chats";
 import ChatMessages from "./pages/ChatMessages";
-import PostInput from "./components/PostInput";
 import Layout from "./pages/Layout";
 import Home from "./pages/Home";
 import Registration from "./pages/Registration";
 import Login from "./pages/Login";
-import VerifyUser from "./pages/VerifyUser";
 import Bookmark from "./pages/Bookmark";
 import Explore from "./pages/Explore";
 
@@ -42,7 +40,6 @@ const router = createBrowserRouter([
       { path: "login", element: <Login /> },
     ],
   },
-  { path: "/verify-token", element: <VerifyUser /> },
 ]);
 
 export default router;

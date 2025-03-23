@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { useUser } from "../context/userContext"
 import axios from "axios"
 import { Image, UserRound, X } from "lucide-react"
-import { toast } from "react-toastify"
+import toast from "react-hot-toast"
 
 function EditProfile({setEdit, setUser, user}){
 
@@ -51,19 +51,17 @@ function EditProfile({setEdit, setUser, user}){
             const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/user/update-profile`, formData, {withCredentials: true})
             console.log(data?.data)
             setUser(prev => ({...prev, ...data?.data}))
-            setTimeout(() => {
-                toast.success('Post updated successfully')
-                setEdit(false)
-            }, 500)
+            toast.success('Profile updated successfully')
+            setEdit(false)
+
 
         } catch (error) {
             console.log(error)
             toast.error(error?.response?.data?.message)
 
         } finally {
-            setTimeout(() => {
-                setLoading(false)
-            }, 500)
+            setLoading(false)
+
         }
     }
 
