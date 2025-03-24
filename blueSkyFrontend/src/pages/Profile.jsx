@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "../context/userContext";
-import usePosts from "../hooks/usePosts";
 import PostCard from "../components/PostCard";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";

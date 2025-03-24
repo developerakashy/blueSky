@@ -4,6 +4,7 @@ import cors from 'cors'
 import { createServer } from 'node:http'
 import { Server } from 'socket.io'
 
+import HealthzRouter from './routes/health.routes.js'
 import userRouter from './routes/user.routes.js'
 import postRouter from './routes/post.routes.js'
 import replyRouter from './routes/reply.routes.js'
@@ -50,7 +51,7 @@ app.use(express.urlencoded({extended: true, limit: '32kb'}))
 app.use(cookieParser())
 
 
-
+app.use('/healthz', HealthzRouter)
 app.use('/user', userRouter)
 app.use('/post', postRouter)
 app.use('/reply', replyRouter)
