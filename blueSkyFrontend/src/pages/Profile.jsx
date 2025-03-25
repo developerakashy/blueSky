@@ -4,7 +4,7 @@ import PostCard from "../components/PostCard";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import EditProfile from "../components/EditProfile";
-import { Image, UserRound } from "lucide-react";
+import { ArrowLeft, Image, UserRound } from "lucide-react";
 import toast from "react-hot-toast";
 import { useLocation } from "react-router-dom";
 import formatDate from "../utils/formatDate";
@@ -153,7 +153,7 @@ function Profile(){
         <div className="w-full">
             {edit && <EditProfile setEdit={setEdit} user={user} setUser={setUser}/>}
             <div className='sticky bg-white/70 border-r border-slate-200 backdrop-blur-sm z-20 p-2 top-0 flex w-full items-center gap-4'>
-                <button onClick={() => navigate(-1)} className='cursor-pointer p-2 backdrop-blur-md hover:bg-black/10 rounded-full ml-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
+                <ArrowLeft onClick={() => navigate(-1)} className="cursor-pointer min-h-9 min-w-9 p-2 backdrop-blur-md hover:bg-black/10 rounded-full rounded-full"/>
                 {user?.username ?
                 <div className="">
                     <p className='font-semibold'>{user?.fullname?.toUpperCase()}</p>
@@ -186,7 +186,7 @@ function Profile(){
 
                 <div className={`text-end px-4 py-3 ${loading ? 'invisible' : ''}`}>
                     {userLoggedIn?.username === username ?
-                        <button onClick={() => setEdit(true)} className="cursor-pointer rounded-full px-4 py-2 bg-stone-200 mr-2">Edit profile</button> :
+                        <button onClick={() => setEdit(true)} className="cursor-pointer rounded-full px-4 py-2 bg-stone-200 mr-2 hover:bg-stone-300">Edit profile</button> :
                         <button onClick={handleFollow} className={`${!userLoggedIn?.username ? 'invisible' : !user?.username ? 'invisible' : ''} cursor-pointer rounded-full px-4 py-2 border-[1px] font-bold border-gray-200 ${followed ? ' text-black hover:bg-red-200 hover:text-red-600 hover:border-red-300' : 'bg-black text-white'}`}>{followed ? 'unfollow' : 'follow'}</button>
                     }
                 </div>

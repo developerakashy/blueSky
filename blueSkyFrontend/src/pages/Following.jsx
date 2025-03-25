@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import UserCard from "../components/UserCard";
+import { ArrowLeft } from "lucide-react";
 
 function FollowingsAndFollowers(){
     const { username } = useParams()
@@ -59,7 +60,7 @@ function FollowingsAndFollowers(){
         <div className="w-full">
             <div className='sticky z-10 top-0 bg-white'>
                 <div className="flex items-center p-2">
-                    <button onClick={() => navigate(-1)} className='px-4 rounded-full mr-6'><img className='cursor-pointer h-4' src="../../.././back.png" alt="" /></button>
+                    <ArrowLeft onClick={() => navigate(-1)} className="cursor-pointer min-h-9 min-w-9 p-2 backdrop-blur-md hover:bg-black/10 rounded-full rounded-full"/>
                     <div>
                         <p className='font-semibold'>{user?.fullname?.toUpperCase()}</p>
                         <p className="text-sm text-gray-500">@{user?.username}</p>

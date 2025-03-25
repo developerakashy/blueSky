@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PostCard from '../components/PostCard'
 import axios from 'axios'
 import { usePostContext } from '../context/postContext'
-import { throttle } from 'lodash'
+import { parseInt, throttle } from 'lodash'
 import { ring2 } from 'ldrs'
 import { useSearchParams } from 'react-router-dom'
 import { useFollowingPostContext } from '../context/followingPost'
@@ -28,7 +28,7 @@ function Home(){
         console.log('request accepted for page ', currentPage)
         setLoading(true)
         try {
-            const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/post/all?page=${currentPage}`, {withCredentials: true})
+            const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/post/all?page=${parseInt(currentPage)}`, {withCredentials: true})
             console.log(data)
 
             if(data.data.length > 0){
@@ -56,7 +56,7 @@ function Home(){
         console.log('request accepted for page ', currentPage)
         setLoading(true)
         try {
-            const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/post/following?page=${currentPage}`, {withCredentials: true})
+            const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/post/following?page=${parseInt(currentPage)}`, {withCredentials: true})
             console.log(data.data)
 
             if(data?.data?.length > 0){

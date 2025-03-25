@@ -71,7 +71,14 @@ const getUserChats = asyncHandler(async (req, res) => {
                         coverImage: 1,
                         about: 1,
                     },
-                    lastMessage: {$ifNull: [{$first: '$chat.message'}, '']}
+                    lastMessage: {$ifNull: [{$first: '$chat.message'}, '']},
+                    lastMessageCreatedAt: {$ifNull: [{$first: '$chat.createdAt'}, '']},
+
+                }
+            },
+            {
+                $sort: {
+                    lastMessageCreatedAt: -1
                 }
             }
         ])

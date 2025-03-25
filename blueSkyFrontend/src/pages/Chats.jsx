@@ -14,7 +14,6 @@ function Chats(){
     const [newChat, setNewChat] = useState(false)
 
     const [searchStr, setSearchStr] = useState('')
-    const [showSuggestion, setShowSuggestion] = useState(false)
 
 
     useEffect(() => {
@@ -130,7 +129,6 @@ function Chats(){
                                         <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
                                     </div> :
 
-                                    // <img className='h-12 w-12 rounded-full object-cover' src={user?.avatar} alt="" />
                                     <img className="h-12 w-12 rounded-full object-cover" src={chatUser?.avatar} alt="" />
                                 }
                                 <div>

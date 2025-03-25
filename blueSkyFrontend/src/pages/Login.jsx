@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import 'ldrs/mirage'
 import 'ldrs/dotPulse'
 import axios from "axios"
+import { Eye, EyeOff, Sparkle } from 'lucide-react'
 
 function Login(){
     const {setUser, setLoading} = useUser()
@@ -107,7 +108,7 @@ function Login(){
             <form className="sm:shadow-md sm:rounded-2xl sm:my-12 sm:h-fit bg-white w-full  sm:max-w-[520px]">
                 <div className='flex flex-col items-center w-full pt-16 sm:pt-6'>
                     <div className="h-18">
-                        <img className="h-14 w-14 shadow-lg p-2 rounded-lg" src='../../sparkle.png' alt="" />
+                    <Sparkle className="h-14 w-14 shadow-lg p-2 rounded-lg stroke-blue-400 fill-blue-400"/>
                     </div>
 
                     <p className="text-4xl mb-4">Sign In</p>
@@ -143,8 +144,8 @@ function Login(){
                             {formData.password &&
                             <button type='button' className='cursor-pointer absolute right-2' onClick={() => setShowPassword(prev => !prev)}>
                                 {showPassword ?
-                                    <img className='h-6 w-6' src="../../hidden.png" alt="" /> :
-                                    <img className='h-6 w-6' src="../../view.png" alt="" />
+                                    <EyeOff className='h-6 w-6'/> :
+                                    <Eye className='h-6 w-6'/>
                                 }
                             </button>}
                         </div>

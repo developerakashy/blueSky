@@ -68,12 +68,11 @@ function EditProfile({setEdit, setUser, user}){
 
     return(
         <div className="fixed z-40 h-screen left-0 w-screen bg-black/50 flex justify-center items-center">
-          <div className="z-10 w-[600px] h-[80%] bg-white rounded-xl">
+          <div className="z-10 max-w-[600px] w-[95%] sm:w-full h-[80%] bg-white rounded-xl">
                 <div className="flex justify-between px-4 py-2 border-b border-slate-200">
                     <div className="flex gap-2 items-center">
                         <X strokeWidth={2.5} onClick={() => setEdit(false)} className="cursor-pointer left-3 top-3 p-1 rounded-full stroke-slate-700 bg-black stroke-white hover:bg-red-500 h-6 w-6"/>
 
-                        {/* <button onClick={() => setEdit(false)} className="px-2 border-2">close</button> */}
                         <p className="font-bold text-lg ml-2">Edit Profile</p>
                     </div>
 
@@ -87,7 +86,6 @@ function EditProfile({setEdit, setUser, user}){
                                 <Image className="h-12 w-12 stroke-gray-500"  />
                             </div> :
 
-                            // <img className="block h-56 w-full object-cover" src={user?.coverImage} alt="" />
                             <img className="block h-52 w-full object-cover" src={coverImageUrl ? coverImageUrl : user?.coverImage} alt="" />
                         }
                         <div className="absolute inset-0 flex justify-center items-center">
@@ -112,7 +110,6 @@ function EditProfile({setEdit, setUser, user}){
                                 <UserRound className="h-12 w-12 stroke-gray-600" />
                             </div> :
 
-                            // <img className="border-[6px] border-white mx-4 block h-32 w-32 absolute bottom-[-64px] rounded-full object-cover" src={user?.avatar} alt="" />
                             <img className="h-full w-full object-cover rounded-full" src={avatarImageUrl ? avatarImageUrl : user?.avatar} alt="" />
                         }
 

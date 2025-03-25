@@ -114,7 +114,6 @@ function CreatePost({setPosts, parentPost, setPublishPost}){
                 [&::-webkit-scrollbar-thumb]:bg-gray-400
                 h-min relative mt-12 pt-14 rounded-xl sm:max-w-[620px]">
                 <X strokeWidth={2.5} onClick={() => setPublishPost({publish: false})} className="cursor-pointer absolute left-3 top-3 p-1 rounded-full stroke-slate-700 hover:bg-slate-300 h-6 w-6"/>
-                {/* <button className="cursor-pointer  bg-white border-slate-300 rounded-full hover:bg-slate-300" onClick={() => setPublishPost({publish: false})}><img className="h-5 w-5 p-1 rounded-full" src="../../cross.png"/></button> */}
                 {parentPost &&
                 <div className="mx-4 flex gap-2">
                     <div className='min-w-12 flex flex-col gap-2 items-center'>

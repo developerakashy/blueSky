@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUser } from "../context/userContext";
 import formatDate from "../utils/formatDate";
 import formatTime from "../utils/formatTime";
-import { UserRound } from "lucide-react";
+import { ArrowLeft, UserRound } from "lucide-react";
 import { ring } from 'ldrs'
 import { quantum } from 'ldrs'
 
@@ -36,6 +36,12 @@ function ChatMessages(){
     }, [messages]);
 
 
+    const redirectUserProfile = (e) => {
+        e.stopPropagation()
+        navigate(`/user/${receiver?.username}`)
+    }
+
+
     useState(() => {
         const fetchMessages = async () => {
             setLoadingMsg(true)
@@ -58,7 +64,8 @@ function ChatMessages(){
 
     }, [chatId])
 
-    const handleSendMessage = async () => {
+    const handleSendMessage = async (e) => {
+        e.preventDefault()
         if(!msgText?.trim() || loading) return
         setLoading(true)
 
@@ -89,20 +96,20 @@ function ChatMessages(){
 
             <div className="flex gap-2 border-b border-slate-200 px-2 py-2 w-full bg-white max-h-[10%]">
                 <div className="flex items-center justify-center">
-                    <button onClick={() => navigate(-1)} className='cursor-pointer p-2 w-max backdrop-blur-md hover:bg-black/10 rounded-full rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
+                    <ArrowLeft onClick={() => navigate(-1)} className="cursor-pointer min-h-9 min-w-9 p-2 backdrop-blur-md hover:bg-black/10 rounded-full rounded-full"/>
                 </div>
                 <div className="min-w-12">
                     {!receiver?.avatar ?
-                        <div className='h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
+                        <div onClick={(e) => redirectUserProfile(e)} className='cursor-pointer h-10 w-10 bg-slate-100 flex justify-center items-center rounded-full object-cover'>
                             <UserRound className='h-5 w-5 stroke-gray-600 rounded-full'/>
                         </div> :
 
-                        <img className='h-10 w-10 rounded-full object-cover' src={receiver?.avatar} alt="" />
+                        <img onClick={(e) => redirectUserProfile(e)} className='cursor-pointer h-10 w-10 rounded-full object-cover' src={receiver?.avatar} alt="" />
                     }
                 </div>
 
-                <div>
-                    <p className="text-[15px] font-bold">{receiver?.fullname?.toUpperCase()}</p>
+                <div onClick={(e) => redirectUserProfile(e)} className="cursor-pointer">
+                    <p className="text-[15px] font-bold hover:underline">{receiver?.fullname?.toUpperCase()}</p>
                     <p className="text-sm">@{receiver?.username}</p>
                 </div>
             </div>
@@ -118,7 +125,7 @@ function ChatMessages(){
 
             </div>
 
-            <div className="w-full bg-white border border-slate-200 px-4 py-2 absolute bottom-12 md:bottom-0 left-0 right-0 flex gap-2 justify-between items-center">
+            <form className="w-full bg-white border border-slate-200 px-4 py-2 absolute bottom-12 md:bottom-0 left-0 right-0 flex gap-2 justify-between items-center">
                 <input
                     className="outline-1 outline-slate-200 focus:outline-slate-400 max-w-[90%] w-full h-10 text-lg px-3 rounded-2xl"
                     type="text"
@@ -127,7 +134,7 @@ function ChatMessages(){
                     placeholder="start a new message"
                     ref={inputRef}
                 />
-                <button onClick={() => handleSendMessage()} className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-full flex">
+                <button type="submit" onClick={(e) => handleSendMessage(e)} className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-full flex">
                     {loading ?
                     <l-ring
                       size="20"
@@ -138,10 +145,10 @@ function ChatMessages(){
                     ></l-ring>:
                     'send'}
                 </button>
-            </div>
+            </form>
 
             {loadingMsg &&
-                <div className="border fixed top-0 bottom-0 left-0 right-0 flex justify-center items-center bg-white/70">
+                <div className="absolute top-0 bottom-0 left-0 right-0 flex justify-center items-center bg-white/70">
                     <l-quantum
                       size="45"
                       speed="1.75"

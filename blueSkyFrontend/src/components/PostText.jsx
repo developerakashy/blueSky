@@ -30,7 +30,7 @@ function PostText({text}){
     }
 
     return(
-        <p className="">
+        <p className="text-[15px]">
             {renderText(text)}
         </p>
     )

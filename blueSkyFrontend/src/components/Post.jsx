@@ -4,7 +4,7 @@ import PostCard from './PostCard'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import PostText from './PostText'
-import { Bookmark, Heart, Repeat2, UserRound } from 'lucide-react'
+import { ArrowLeft, Bookmark, Heart, Repeat2, UserRound } from 'lucide-react'
 import formatTime from '../utils/formatTime'
 import formatDate from '../utils/formatDate'
 import toast from 'react-hot-toast'
@@ -273,7 +273,7 @@ function Post({post, postReplies, parentPost}){
     <>
         <div className='w-full'>
             <div className='sticky top-0 border-r border-slate-200 bg-white/70 backdrop-blur-sm z-30 flex items-center py-2 px-1 gap-4'>
-                <button onClick={() => navigate(-1)} className='cursor-pointer p-2 backdrop-blur-md hover:bg-black/10 rounded-full ml-2 rounded-full'><img className='h-4' src="../../.././back.png" alt="" /></button>
+                <ArrowLeft onClick={() => navigate(-1)} className="cursor-pointer min-h-9 min-w-9 p-2 backdrop-blur-md hover:bg-black/10 rounded-full rounded-full"/>
                 <p className='text-xl font-semibold'>Post</p>
             </div>
 
@@ -335,8 +335,6 @@ function Post({post, postReplies, parentPost}){
                     <p className='text-gray-600 self-start'>{formatTime(post?.createdAt)}</p>
                     <p className='self-start text-gray-600 mx-1'>·</p>
                     <p className='text-gray-600 self-start'>{formatDate(post?.createdAt)}</p>
-                    {/* <p className='self-start text-gray-600 mx-1'>·</p>
-                    <p className='text-gray-600 self-start'>55.k views</p> */}
                 </div>
 
                 <div className='flex justify-between mx-2 py-1 border-y border-slate-200 text-sm'>

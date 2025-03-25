@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/userContext";
 import { dotPulse } from "ldrs";
+import { Eye, EyeOff, Sparkle } from "lucide-react";
 dotPulse.register()
 
 function Registration(){
@@ -235,7 +236,7 @@ function Registration(){
             <form className="sm:shadow-md sm:rounded-2xl sm:my-12 sm:h-fit bg-white w-full sm:max-w-[520px]">
                 <div className='flex flex-col items-center w-full pt-6'>
                     <div className="h-18">
-                        <img className="h-14 w-14 shadow-lg p-2 rounded-lg" src='../../sparkle.png' alt="" />
+                        <Sparkle className="h-14 w-14 shadow-lg p-2 rounded-lg stroke-blue-400 fill-blue-400"/>
                     </div>
 
                     <p className="text-4xl mb-4">Sign Up</p>
@@ -328,8 +329,8 @@ function Registration(){
                             {formData.password &&
                             <button type='button' className='cursor-pointer absolute right-2' onClick={() => setShowPassword(prev => !prev)}>
                                 {showPassword ?
-                                    <img className='h-6 w-6' src="../../hidden.png" alt="" /> :
-                                    <img className='h-6 w-6' src="../../view.png" alt="" />
+                                    <EyeOff className='h-6 w-6'/> :
+                                    <Eye className='h-6 w-6'/>
                                 }
                             </button>}
                         </div>
