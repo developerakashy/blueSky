@@ -65,6 +65,7 @@ function ChatMessages(){
     }, [chatId])
 
     const handleSendMessage = async (e) => {
+        inputRef.current?.focus()
         e.preventDefault()
         if(!msgText?.trim() || loading) return
         setLoading(true)
@@ -81,6 +82,7 @@ function ChatMessages(){
             console.log(data)
             setMessages(prev => [...prev, data.data])
             setMsgText('')
+
 
         } catch (error) {
             console.log(error)
@@ -127,17 +129,17 @@ function ChatMessages(){
 
             <form className="w-full bg-white border border-slate-200 px-4 py-2 absolute bottom-12 md:bottom-0 left-0 right-0 flex gap-2 justify-between items-center">
                 <input
-                    className="outline-1 outline-slate-200 focus:outline-slate-400 max-w-[90%] w-full h-10 text-lg px-3 rounded-2xl"
+                    className="outline-1 outline-slate-200 focus:outline-slate-300 max-w-[90%] w-full h-10 text-lg px-3 rounded-2xl"
                     type="text"
                     value={msgText}
                     onChange={(e) => !loading && setMsgText(e.target.value)}
                     placeholder="start a new message"
                     ref={inputRef}
                 />
-                <button type="submit" onClick={(e) => handleSendMessage(e)} className="cursor-pointer px-4 py-2 bg-blue-500 text-white rounded-full flex">
+                <button type="submit" onClick={(e) => handleSendMessage(e)} className="cursor-pointer min-w-18  px-4 py-2 bg-blue-500 text-white rounded-full flex justify-center">
                     {loading ?
                     <l-ring
-                      size="20"
+                      size="24"
                       stroke="3"
                       bg-opacity="0"
                       speed="2"

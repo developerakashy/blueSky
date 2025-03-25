@@ -95,9 +95,9 @@ function ChatCard({chat, chatWithUser}){
 
                     </div>
 
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center min-h-5">
                         <p className="">{chat?.lastMessage || ''}</p>
-                        <p className="text-xs px-2 text-gray-800">{formatTimeLine(chat?.lastMessageCreatedAt) || ''}</p>
+                        <p className="text-xs px-2 text-gray-800">{chat?.lastMessage ? formatTimeLine(chat?.lastMessageCreatedAt) : ''}</p>
                     </div>
                 </div>
             </div>

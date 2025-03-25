@@ -132,7 +132,7 @@ const deleteMessages = asyncHandler(async (req, res) => {
             }
         )
 
-        // await Chat.findByIdAndUpdate(chatId, {lastMessageId: null})
+        await Chat.findByIdAndUpdate(chatId, {lastMessageId: null})
 
         return res.status(200).json(new ApiResponse(200, {}, 'message deleted'))
     } catch (error) {
